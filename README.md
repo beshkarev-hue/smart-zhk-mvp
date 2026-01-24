@@ -1,54 +1,34 @@
-# Smart ZhK MVP - Умная ЖКХ платформа
+# Smart ZhK MVP - Умное ЖКХ
 
-Комплексная платформа для управления жилищно-коммунальным хозяйством.
+Платформа для управления жилищно-коммунальным хозяйством.
 
-## Технологический стек
+## Технологии
 
-### Backend
-- NestJS (Node.js framework)
-- PostgreSQL (база данных)
-- TypeORM (ORM)
-- JWT (аутентификация)
-- Swagger (API документация)
+**Backend:** NestJS + TypeScript + PostgreSQL + JWT
+**Frontend:** React 18 + TypeScript
+**Инфраструктура:** Docker + Docker Compose
 
-### Frontend
-- React 18
-- TypeScript
-- React Router
-- Axios
-- Tailwind CSS
+## Запуск проекта
 
-### Infrastructure
-- Docker & Docker Compose
-- Nginx (reverse proxy)
+1. `docker-compose up -d postgres`
+2. `cd backend && npm run start:dev`
+3. `cd frontend && npm start`
 
-## Структура проекта
-smart-zhk-mvp/
-├── backend/          # NestJS API server
-├── frontend/         # React приложение
-├── docs/            # Документация
-└── docker-compose.yml
-## Быстрый старт
+## Функционал MVP
 
-```bash
-# Установка зависимостей
-cd backend && npm install
-cd ../frontend && npm install
+✅ Авторизация и регистрация
+✅ Dashboard с статистикой
+✅ Управление платежами
+✅ Создание и отслеживание заявок
+✅ Новости и объявления
+✅ Профиль пользователя
 
-# Запуск через Docker
-docker-compose up -d
+## API Документация
 
-# Backend: http://localhost:3000
-# Frontend: http://localhost:3001
-# API Docs: http://localhost:3000/api
-Модули MVP (Фаза 1)
-	1.	✅ Управление пользователями и авторизация
-	2.	✅ Личный кабинет жильца
-	3.	✅ Личный кабинет УК
-	4.	✅ Начисления и платежи
-	5.	✅ Управление заявками
-	6.	✅ Информационный раздел
-Roadmap
-	∙	Фаза 1 (22 янв - 1 апр): Core модули MVP
-	∙	Фаза 2 (апр-май): Расширенный функционал
-	∙	Фаза 3 (май-июнь): Advanced features
+http://localhost:3000/api (Swagger)
+
+## Планы развития
+
+- [ ] Интеграция с Госуслугами
+- [ ] Кабинет УК/ТСЖ
+- [ ] Интеграция с ГИС ЖКХ
