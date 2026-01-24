@@ -1,4 +1,3 @@
-import { User } from '../users/user.entity';
 export declare enum NewsType {
     ANNOUNCEMENT = "announcement",
     NEWS = "news",
@@ -8,13 +7,12 @@ export declare enum NewsType {
 }
 export declare class News {
     id: string;
+    authorId: string;
+    type: NewsType;
     title: string;
     content: string;
-    type: NewsType;
-    author: User;
-    authorId: string;
-    isPublished: boolean;
     imageUrl: string;
+    isPublished: boolean;
     createdAt: Date;
     updatedAt: Date;
 }

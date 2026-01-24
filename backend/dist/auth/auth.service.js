@@ -21,25 +21,18 @@ let AuthService = class AuthService {
     }
     async validateUser(email, password) {
         const user = await this.usersService.findByEmail(email);
+        if (user && await bcrypt.compare(password, user.password)) {
+            const { password, ...result } = user;
+            return result;
+        }
+        return null;
+    }
+    async login(email, password) {
+        const user = await this.validateUser(email, password);
         if (!user) {
             throw new common_1.UnauthorizedException('Неверный email или пароль');
         }
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            throw new common_1.UnauthorizedException('Неверный email или пароль');
-        }
-        if (!user.isActive) {
-            throw new common_1.UnauthorizedException('Аккаунт деактивирован');
-        }
-        const { password: _, ...result } = user;
-        return result;
-    }
-    async login(user) {
-        const payload = {
-            email: user.email,
-            sub: user.id,
-            role: user.role,
-        };
+        const payload = { email: user.email, sub: user.id, role: user.role };
         return {
             access_token: this.jwtService.sign(payload),
             user: {
@@ -47,15 +40,17 @@ let AuthService = class AuthService {
                 email: user.email,
                 firstName: user.firstName,
                 lastName: user.lastName,
+                middleName: user.middleName,
+                phone: user.phone,
                 role: user.role,
+                apartmentNumber: user.apartmentNumber,
+                buildingAddress: user.buildingAddress,
+                isActive: user.isActive,
+                createdAt: user.createdAt,
             },
         };
     }
     async register(userData) {
-        const existingUser = await this.usersService.findByEmail(userData.email);
-        if (existingUser) {
-            throw new common_1.UnauthorizedException('Пользователь с таким email уже существует');
-        }
         return this.usersService.create(userData);
     }
 };

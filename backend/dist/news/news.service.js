@@ -27,39 +27,26 @@ let NewsService = class NewsService {
     }
     async findAll() {
         return this.newsRepository.find({
-            relations: ['author'],
-            where: { isPublished: true },
             order: { createdAt: 'DESC' },
         });
     }
     async findOne(id) {
-        const news = await this.newsRepository.findOne({
-            where: { id },
-            relations: ['author'],
-        });
-        if (!news) {
-            throw new common_1.NotFoundException(`Новость с ID ${id} не найдена`);
-        }
-        return news;
+        return this.newsRepository.findOne({ where: { id } });
     }
     async update(id, newsData) {
-        const news = await this.findOne(id);
-        Object.assign(news, newsData);
-        return this.newsRepository.save(news);
+        await this.newsRepository.update(id, newsData);
+        return this.findOne(id);
     }
     async remove(id) {
-        const news = await this.findOne(id);
-        await this.newsRepository.remove(news);
+        await this.newsRepository.delete(id);
     }
     async publish(id) {
-        const news = await this.findOne(id);
-        news.isPublished = true;
-        return this.newsRepository.save(news);
+        await this.newsRepository.update(id, { isPublished: true });
+        return this.findOne(id);
     }
     async unpublish(id) {
-        const news = await this.findOne(id);
-        news.isPublished = false;
-        return this.newsRepository.save(news);
+        await this.newsRepository.update(id, { isPublished: false });
+        return this.findOne(id);
     }
 };
 exports.NewsService = NewsService;

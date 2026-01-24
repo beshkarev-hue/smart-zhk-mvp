@@ -2,20 +2,7 @@ import { AuthService } from './auth.service';
 export declare class AuthController {
     private authService;
     constructor(authService: AuthService);
-    register(registerDto: {
-        email: string;
-        password: string;
-        firstName: string;
-        lastName: string;
-        middleName?: string;
-        phone?: string;
-        apartmentNumber?: string;
-        buildingAddress?: string;
-    }): Promise<{
-        message: string;
-        userId: string;
-    }>;
-    login(loginDto: {
+    login(body: {
         email: string;
         password: string;
     }): Promise<{
@@ -25,7 +12,15 @@ export declare class AuthController {
             email: any;
             firstName: any;
             lastName: any;
+            middleName: any;
+            phone: any;
             role: any;
+            apartmentNumber: any;
+            buildingAddress: any;
+            isActive: any;
+            createdAt: any;
         };
     }>;
+    register(userData: any): Promise<import("../users/user.entity").User>;
+    getProfile(req: any): any;
 }

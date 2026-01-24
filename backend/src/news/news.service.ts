@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { News } from './news.entity';
@@ -17,45 +17,30 @@ export class NewsService {
 
   async findAll(): Promise<News[]> {
     return this.newsRepository.find({
-      relations: ['author'],
-      where: { isPublished: true },
       order: { createdAt: 'DESC' },
     });
   }
 
   async findOne(id: string): Promise<News> {
-    const news = await this.newsRepository.findOne({
-      where: { id },
-      relations: ['author'],
-    });
-
-    if (!news) {
-      throw new NotFoundException(`Новость с ID ${id} не найдена`);
-    }
-
-    return news;
+    return this.newsRepository.findOne({ where: { id } });
   }
 
   async update(id: string, newsData: Partial<News>): Promise<News> {
-    const news = await this.findOne(id);
-    Object.assign(news, newsData);
-    return this.newsRepository.save(news);
+    await this.newsRepository.update(id, newsData);
+    return this.findOne(id);
   }
 
   async remove(id: string): Promise<void> {
-    const news = await this.findOne(id);
-    await this.newsRepository.remove(news);
+    await this.newsRepository.delete(id);
   }
 
   async publish(id: string): Promise<News> {
-    const news = await this.findOne(id);
-    news.isPublished = true;
-    return this.newsRepository.save(news);
+    await this.newsRepository.update(id, { isPublished: true });
+    return this.findOne(id);
   }
 
   async unpublish(id: string): Promise<News> {
-    const news = await this.findOne(id);
-    news.isPublished = false;
-    return this.newsRepository.save(news);
+    await this.newsRepository.update(id, { isPublished: false });
+    return this.findOne(id);
   }
 }
