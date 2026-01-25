@@ -61,7 +61,7 @@ const NewsPage: React.FC = () => {
               <article key={item.id} style={styles.newsCard}>
                 <div style={styles.newsHeader}>
                   <div style={{...styles.newsType, ...(item.type === 'announcement' && styles.typeAnnouncement), ...(item.type === 'news' && styles.typeNews), ...(item.type === 'event' && styles.typeEvent), ...(item.type === 'maintenance' && styles.typeMaintenance), ...(item.type === 'emergency' && styles.typeEmergency)}}>
-                    {getNewsTypeIcon(item.type)} {getNewsTypeText(item.type)}
+                    {getNewsTypeIcon(item.type || "")} {getNewsTypeText(item.type || "")}
                   </div>
                   <div style={styles.newsDate}>{new Date(item.createdAt).toLocaleDateString('ru-RU', {day: 'numeric', month: 'long', year: 'numeric'})}</div>
                 </div>

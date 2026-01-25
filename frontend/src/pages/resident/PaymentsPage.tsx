@@ -83,7 +83,7 @@ const PaymentsPage: React.FC = () => {
               <div key={payment.id} style={styles.paymentCard}>
                 <div style={styles.paymentHeader}>
                   <div>
-                    <div style={styles.paymentType}>{getPaymentTypeText(payment.type)}</div>
+                    <div style={styles.paymentType}>{getPaymentTypeText(payment.type || "")}</div>
                     <div style={styles.paymentPeriod}>Период: {payment.period}</div>
                   </div>
                   <div style={{...styles.paymentStatus, ...(payment.status === 'pending' && styles.statusPending), ...(payment.status === 'paid' && styles.statusPaid), ...(payment.status === 'overdue' && styles.statusOverdue)}}>
@@ -103,10 +103,10 @@ const PaymentsPage: React.FC = () => {
                       <div style={styles.detailLabel}>Срок оплаты</div>
                       <div>{new Date(payment.dueDate).toLocaleDateString('ru-RU')}</div>
                     </div>
-                    {payment.paidDate && (
+                    {payment.paidAt && (
                       <div>
                         <div style={styles.detailLabel}>Дата оплаты</div>
-                        <div>{new Date(payment.paidDate).toLocaleDateString('ru-RU')}</div>
+                        <div>{new Date(payment.paidAt).toLocaleDateString('ru-RU')}</div>
                       </div>
                     )}
                   </div>

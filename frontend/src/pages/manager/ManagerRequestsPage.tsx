@@ -8,8 +8,17 @@ const ManagerRequestsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  
+  // Форма управления
   const [response, setResponse] = useState('');
   const [newStatus, setNewStatus] = useState('');
+  const [assignedTo, setAssignedTo] = useState('');
+  const [assignedPosition, setAssignedPosition] = useState('');
+  const [deadline, setDeadline] = useState('');
+  const [isFree, setIsFree] = useState(true);
+  const [estimatedCost, setEstimatedCost] = useState('');
+  const [estimateDetails, setEstimateDetails] = useState('');
+  const [executorComment, setExecutorComment] = useState('');
 
   useEffect(() => {
     loadRequests();
@@ -26,24 +35,57 @@ const ManagerRequestsPage: React.FC = () => {
     }
   };
 
+  const handleOpenManage = (req: Request) => {
+    setSelectedRequest(req);
+    setResponse(req.response || '');
+    setNewStatus(req.status);
+    setAssignedTo(req.assignedTo || '');
+    setAssignedPosition(req.assignedPosition || '');
+    setDeadline(req.deadline ? new Date(req.deadline).toISOString().slice(0, 16) : '');
+    setIsFree(req.isFree ?? true);
+    setEstimatedCost(req.estimatedCost?.toString() || '');
+    setEstimateDetails(req.estimateDetails || '');
+    setExecutorComment(req.executorComment || '');
+  };
+
   const handleUpdateRequest = async () => {
     if (!selectedRequest) return;
 
     try {
-      await requestsService.update(selectedRequest.id, {
-        status: newStatus as any || selectedRequest.status,
-        response: response || selectedRequest.response,
-      });
+      const updateData: any = {
+        status: newStatus,
+        response,
+        assignedTo: assignedTo || undefined,
+        assignedPosition: assignedPosition || undefined,
+        deadline: deadline ? new Date(deadline).toISOString() : undefined,
+        isFree,
+        estimatedCost: estimatedCost ? parseFloat(estimatedCost) : undefined,
+        estimateDetails: estimateDetails || undefined,
+        executorComment: executorComment || undefined,
+      };
+
+      await requestsService.update(selectedRequest.id, updateData);
       
       alert('✅ Заявка обновлена!');
       setSelectedRequest(null);
-      setResponse('');
-      setNewStatus('');
+      resetForm();
       loadRequests();
     } catch (error) {
       console.error('Ошибка обновления:', error);
       alert('❌ Ошибка обновления заявки');
     }
+  };
+
+  const resetForm = () => {
+    setResponse('');
+    setNewStatus('');
+    setAssignedTo('');
+    setAssignedPosition('');
+    setDeadline('');
+    setIsFree(true);
+    setEstimatedCost('');
+    setEstimateDetails('');
+    setExecutorComment('');
   };
 
   const getTypeIcon = (type: string) => {
@@ -153,13 +195,32 @@ const ManagerRequestsPage: React.FC = () => {
                 </div>
               </div>
 
+              {req.assignedTo && (
+                <div style={styles.assignedBox}>
+                  <strong>👷 Исполнитель:</strong> {req.assignedTo} ({req.assignedPosition})
+                  {req.deadline && <div style={styles.deadline}>⏰ Срок: {new Date(req.deadline).toLocaleDateString('ru-RU')}</div>}
+                </div>
+              )}
+
+              {req.estimatedCost && (
+                <div style={styles.costBox}>
+                  <strong>💰 Стоимость:</strong> {req.isFree ? 'Бесплатно' : `${req.estimatedCost.toLocaleString('ru-RU')} ₽`}
+                </div>
+              )}
+
               {req.response && (
                 <div style={styles.responseBox}>
                   <strong>Ответ УК:</strong> {req.response}
                 </div>
               )}
 
-              <button onClick={() => { setSelectedRequest(req); setResponse(req.response || ''); setNewStatus(req.status); }} style={styles.manageButton}>
+              {req.executorComment && (
+                <div style={styles.executorBox}>
+                  <strong>Комментарий исполнителя:</strong> {req.executorComment}
+                </div>
+              )}
+
+              <button onClick={() => handleOpenManage(req)} style={styles.manageButton}>
                 Управление заявкой
               </button>
             </div>
@@ -177,23 +238,70 @@ const ManagerRequestsPage: React.FC = () => {
             <h3 style={styles.modalTitle}>Управление заявкой</h3>
             <p style={styles.modalSubtitle}>{selectedRequest.title}</p>
 
+            <div style={styles.formGrid}>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Статус</label>
+                <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)} style={styles.select}>
+                  <option value="new">Новая</option>
+                  <option value="in_progress">В работе</option>
+                  <option value="completed">Выполнена</option>
+                  <option value="rejected">Отклонена</option>
+                </select>
+              </div>
+
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Исполнитель (ФИО)</label>
+                <input value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} style={styles.input} placeholder="Иванов И.И." />
+              </div>
+
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Должность</label>
+                <select value={assignedPosition} onChange={(e) => setAssignedPosition(e.target.value)} style={styles.select}>
+                  <option value="">Выберите...</option>
+                  <option value="Сантехник">Сантехник</option>
+                  <option value="Электрик">Электрик</option>
+                  <option value="Слесарь">Слесарь</option>
+                  <option value="Мастер">Мастер</option>
+                </select>
+              </div>
+
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Срок исполнения</label>
+                <input type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} style={styles.input} />
+              </div>
+            </div>
+
             <div style={styles.inputGroup}>
-              <label style={styles.label}>Статус</label>
-              <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)} style={styles.select}>
-                <option value="new">Новая</option>
-                <option value="in_progress">В работе</option>
-                <option value="completed">Выполнена</option>
-                <option value="rejected">Отклонена</option>
-              </select>
+              <label style={styles.label}>
+                <input type="checkbox" checked={isFree} onChange={(e) => setIsFree(e.target.checked)} style={{marginRight: '8px'}} />
+                Бесплатно
+              </label>
+            </div>
+
+            {!isFree && (
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Стоимость работ (₽)</label>
+                <input type="number" value={estimatedCost} onChange={(e) => setEstimatedCost(e.target.value)} style={styles.input} placeholder="5000" />
+              </div>
+            )}
+
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Детали сметы</label>
+              <textarea value={estimateDetails} onChange={(e) => setEstimateDetails(e.target.value)} style={styles.textarea} rows={3} placeholder="Материалы, работы..." />
+            </div>
+
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Комментарий исполнителя</label>
+              <textarea value={executorComment} onChange={(e) => setExecutorComment(e.target.value)} style={styles.textarea} rows={2} placeholder="Комментарий..." />
             </div>
 
             <div style={styles.inputGroup}>
               <label style={styles.label}>Ответ жильцу</label>
-              <textarea value={response} onChange={(e) => setResponse(e.target.value)} style={styles.textarea} rows={4} placeholder="Введите ответ..." />
+              <textarea value={response} onChange={(e) => setResponse(e.target.value)} style={styles.textarea} rows={3} placeholder="Ответ..." />
             </div>
 
             <div style={styles.modalActions}>
-              <button onClick={() => { setSelectedRequest(null); setResponse(''); setNewStatus(''); }} style={styles.cancelButton}>Отмена</button>
+              <button onClick={() => { setSelectedRequest(null); resetForm(); }} style={styles.cancelButton}>Отмена</button>
               <button onClick={handleUpdateRequest} style={styles.saveButton}>Сохранить</button>
             </div>
           </div>
@@ -228,15 +336,21 @@ const styles: Record<string, React.CSSProperties> = {
   requestMeta: { display: 'flex', gap: '24px', marginBottom: '16px', flexWrap: 'wrap' },
   metaItem: { display: 'flex', gap: '8px', fontSize: '14px' },
   metaLabel: { color: '#666' },
-  responseBox: { backgroundColor: '#e8f5e9', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '16px', borderLeft: '4px solid #4caf50' },
+  assignedBox: { backgroundColor: '#e3f2fd', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '12px', borderLeft: '4px solid #2196f3' },
+  deadline: { marginTop: '8px', fontSize: '13px', color: '#666' },
+  costBox: { backgroundColor: '#fff3e0', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '12px', borderLeft: '4px solid #ff9800' },
+  responseBox: { backgroundColor: '#e8f5e9', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '12px', borderLeft: '4px solid #4caf50' },
+  executorBox: { backgroundColor: '#f3e5f5', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '16px', borderLeft: '4px solid #9c27b0' },
   manageButton: { padding: '10px 20px', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '14px', fontWeight: '500' },
-  modal: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
-  modalContent: { backgroundColor: 'white', borderRadius: '8px', padding: '32px', maxWidth: '600px', width: '90%', maxHeight: '80vh', overflow: 'auto' },
+  modal: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, overflow: 'auto' },
+  modalContent: { backgroundColor: 'white', borderRadius: '8px', padding: '32px', maxWidth: '800px', width: '90%', maxHeight: '90vh', overflow: 'auto' },
   modalTitle: { fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', marginTop: 0 },
   modalSubtitle: { fontSize: '16px', color: '#666', marginBottom: '24px' },
+  formGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '16px' },
   inputGroup: { marginBottom: '20px' },
   label: { display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px' },
   select: { width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px' },
+  input: { width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px' },
   textarea: { width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px', fontFamily: 'inherit', resize: 'vertical' },
   modalActions: { display: 'flex', gap: '12px', justifyContent: 'flex-end' },
   cancelButton: { padding: '10px 20px', backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer' },

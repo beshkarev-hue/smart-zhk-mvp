@@ -1,28 +1,4 @@
-export enum UserRole {
-  RESIDENT = 'resident',
-  MANAGER = 'manager',
-  ADMIN = 'admin',
-}
-
-export interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  middleName?: string;
-  phone?: string;
-  role: UserRole;
-  apartmentNumber?: string;
-  buildingAddress?: string;
-  isActive: boolean;
-  createdAt: string;
-}
-
-export interface AuthResponse {
-  access_token: string;
-  user: User;
-}
-
+// Auth types
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -35,39 +11,32 @@ export interface RegisterData {
   lastName: string;
   middleName?: string;
   phone?: string;
+  role?: string;
   apartmentNumber?: string;
   buildingAddress?: string;
 }
 
-export enum PaymentStatus {
-  PENDING = 'pending',
-  PAID = 'paid',
-  OVERDUE = 'overdue',
+export interface AuthResponse {
+  access_token: string;
+  user: User;
 }
 
-export enum PaymentType {
-  UTILITIES = 'utilities',
-  MAINTENANCE = 'maintenance',
-  HEATING = 'heating',
-  WATER = 'water',
-  ELECTRICITY = 'electricity',
-  GAS = 'gas',
-  OTHER = 'other',
-}
-
-export interface Payment {
+// User types
+export interface User {
   id: string;
-  userId: string;
-  type: PaymentType;
-  amount: number;
-  status: PaymentStatus;
-  period: string;
-  description?: string;
-  dueDate: string;
-  paidDate?: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  phone?: string;
+  role: string;
+  apartmentNumber?: string;
+  buildingAddress?: string;
+  isActive: boolean;
   createdAt: string;
 }
 
+// Request types
 export enum RequestStatus {
   NEW = 'new',
   IN_PROGRESS = 'in_progress',
@@ -76,47 +45,62 @@ export enum RequestStatus {
 }
 
 export enum RequestType {
-  REPAIR = 'repair',
   PLUMBING = 'plumbing',
   ELECTRICITY = 'electricity',
   HEATING = 'heating',
   CLEANING = 'cleaning',
-  GARBAGE = 'garbage',
-  ELEVATOR = 'elevator',
-  INTERCOM = 'intercom',
+  REPAIR = 'repair',
   OTHER = 'other',
 }
 
 export interface Request {
   id: string;
   userId: string;
-  type: RequestType;
+  type: RequestType | string;
   title: string;
   description: string;
-  status: RequestStatus;
+  status: RequestStatus | string;
   apartmentNumber?: string;
   buildingAddress?: string;
   response?: string;
+  assignedTo?: string;
+  assignedPosition?: string;
+  deadline?: string;
+  estimatedCost?: number;
+  isFree?: boolean;
+  estimateDetails?: string;
+  residentApproval?: boolean;
+  executorComment?: string;
+  residentComment?: string;
+  photosBefore?: string[];
+  photosAfter?: string[];
+  isPaid?: boolean;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
+  completedAt?: string;
 }
 
-export enum NewsType {
-  ANNOUNCEMENT = 'announcement',
-  NEWS = 'news',
-  EVENT = 'event',
-  MAINTENANCE = 'maintenance',
-  EMERGENCY = 'emergency',
+// Payment types
+export interface Payment {
+  id: string;
+  userId: string;
+  amount: number;
+  period: string;
+  status: string;
+  type?: string;
+  dueDate: string;
+  paidAt?: string;
+  description: string;
+  createdAt: string;
 }
 
+// News types
 export interface News {
   id: string;
   title: string;
   content: string;
-  type: NewsType;
-  authorId: string;
-  isPublished: boolean;
+  type?: string;
   imageUrl?: string;
+  isPublished: boolean;
   createdAt: string;
-  updatedAt: string;
 }
