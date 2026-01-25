@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { PaymentsModule } from './payments/payments.module';
 import { RequestsModule } from './requests/requests.module';
 import { NewsModule } from './news/news.module';
+import { GisZhkhModule } from './gis-zhkh/gis-zhkh.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { NewsModule } from './news/news.module';
     PaymentsModule,
     RequestsModule,
     NewsModule,
+    GisZhkhModule,
   ],
 })
 export class AppModule {}
