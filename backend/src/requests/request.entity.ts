@@ -2,6 +2,8 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 
 export enum RequestStatus {
   NEW = 'new',
+  ASSIGNED = 'assigned',
+  ACCEPTED = 'accepted',
   IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   REJECTED = 'rejected',
@@ -52,42 +54,68 @@ export class Request {
   @Column('text', { nullable: true })
   response: string;
 
-  // Новые поля для расширенного функционала
+  // Исполнитель
   @Column({ nullable: true })
-  assignedTo: string; // ФИО исполнителя
+  executorId: string; // ID исполнителя из users
 
   @Column({ nullable: true })
-  assignedPosition: string; // Должность (Сантехник, Электрик)
+  assignedTo: string; // ФИО исполнителя (для отображения)
+
+  @Column({ nullable: true })
+  assignedPosition: string; // Должность
+
+  @Column({ default: false })
+  executorAccepted: boolean; // Исполнитель принял заявку
+
+  @Column({ default: false })
+  executorRejected: boolean; // Исполнитель отклонил заявку
+
+  @Column('text', { nullable: true })
+  executorRejectionReason: string; // Причина отказа
 
   @Column({ type: 'timestamp', nullable: true })
-  deadline: Date; // Срок исполнения
+  deadline: Date;
+
+  // Стоимость
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  estimatedCost: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  estimatedCost: number; // Стоимость работ
+  finalCost: number; // Финальная стоимость (может меняться исполнителем)
 
   @Column({ default: false })
-  isFree: boolean; // Бесплатно или платно
+  isFree: boolean;
 
   @Column('text', { nullable: true })
-  estimateDetails: string; // Детали сметы
+  estimateDetails: string;
 
+  // Согласования
   @Column({ nullable: true })
-  residentApproval: boolean; // Согласие жильца (null = не рассмотрено)
+  residentApproval: boolean; // null = не рассмотрено, true = принято, false = отклонено
 
   @Column('text', { nullable: true })
-  executorComment: string; // Комментарий исполнителя
+  residentRejectionReason: string; // Причина отказа жильца
+
+  // Комментарии
+  @Column('text', { nullable: true })
+  executorComment: string;
 
   @Column('text', { nullable: true })
-  residentComment: string; // Комментарий жильца
+  residentComment: string;
+
+  // Рейтинг
+  @Column({ type: 'int', nullable: true })
+  executorRating: number; // Оценка исполнителя жильцом (1-5)
+
+  // Фото
+  @Column('simple-array', { nullable: true })
+  photosBefore: string[];
 
   @Column('simple-array', { nullable: true })
-  photosBefore: string[]; // Фото до работ
-
-  @Column('simple-array', { nullable: true })
-  photosAfter: string[]; // Фото после работ
+  photosAfter: string[];
 
   @Column({ default: false })
-  isPaid: boolean; // Оплачено
+  isPaid: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -96,5 +124,5 @@ export class Request {
   updatedAt: Date;
 
   @Column({ type: 'timestamp', nullable: true })
-  completedAt: Date; // Дата завершения
+  completedAt: Date;
 }

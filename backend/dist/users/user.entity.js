@@ -15,6 +15,7 @@ var UserRole;
 (function (UserRole) {
     UserRole["RESIDENT"] = "resident";
     UserRole["MANAGER"] = "manager";
+    UserRole["EXECUTOR"] = "executor";
     UserRole["ADMIN"] = "admin";
 })(UserRole || (exports.UserRole = UserRole = {}));
 let User = class User {
@@ -65,6 +66,22 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "buildingAddress", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "position", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "photoUrl", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 3, scale: 2, default: 0 }),
+    __metadata("design:type", Number)
+], User.prototype, "rating", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', default: 0 }),
+    __metadata("design:type", Number)
+], User.prototype, "ratingsCount", void 0);
+__decorate([
     (0, typeorm_1.Column)({ default: true }),
     __metadata("design:type", Boolean)
 ], User.prototype, "isActive", void 0);
@@ -72,6 +89,10 @@ __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], User.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)(),
+    __metadata("design:type", Date)
+], User.prototype, "updatedAt", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)('users')
 ], User);

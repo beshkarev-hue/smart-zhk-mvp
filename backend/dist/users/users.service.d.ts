@@ -4,9 +4,8 @@ export declare class UsersService {
     private usersRepository;
     constructor(usersRepository: Repository<User>);
     create(userData: Partial<User>): Promise<User>;
-    findAll(): Promise<User[]>;
-    findOne(id: string): Promise<User>;
     findByEmail(email: string): Promise<User | undefined>;
-    update(id: string, userData: Partial<User>): Promise<User>;
-    remove(id: string): Promise<void>;
+    findById(id: string): Promise<User | undefined>;
+    findByRole(role: string): Promise<User[]>;
+    updateRating(userId: string, newRating: number): Promise<void>;
 }

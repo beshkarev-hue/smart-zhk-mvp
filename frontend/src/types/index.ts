@@ -32,6 +32,10 @@ export interface User {
   role: string;
   apartmentNumber?: string;
   buildingAddress?: string;
+  position?: string;
+  photoUrl?: string;
+  rating?: number;
+  ratingsCount?: number;
   isActive: boolean;
   createdAt: string;
 }
@@ -39,6 +43,8 @@ export interface User {
 // Request types
 export enum RequestStatus {
   NEW = 'new',
+  ASSIGNED = 'assigned',
+  ACCEPTED = 'accepted',
   IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   REJECTED = 'rejected',
@@ -63,15 +69,22 @@ export interface Request {
   apartmentNumber?: string;
   buildingAddress?: string;
   response?: string;
+  executorId?: string;
   assignedTo?: string;
   assignedPosition?: string;
+  executorAccepted?: boolean;
+  executorRejected?: boolean;
+  executorRejectionReason?: string;
   deadline?: string;
   estimatedCost?: number;
+  finalCost?: number;
   isFree?: boolean;
   estimateDetails?: string;
   residentApproval?: boolean;
+  residentRejectionReason?: string;
   executorComment?: string;
   residentComment?: string;
+  executorRating?: number;
   photosBefore?: string[];
   photosAfter?: string[];
   isPaid?: boolean;

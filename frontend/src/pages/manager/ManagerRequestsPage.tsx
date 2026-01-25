@@ -1,10 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { requestsService } from '../../services/api';
+import { requestsService, usersService } from '../../services/api';
 import { Request } from '../../types';
+
+interface Executor {
+  id: string;
+  firstName: string;
+  lastName: string;
+  middleName: string;
+  position: string;
+  rating: number;
+  ratingsCount: number;
+  phone: string;
+}
 
 const ManagerRequestsPage: React.FC = () => {
   const [requests, setRequests] = useState<Request[]>([]);
+  const [executors, setExecutors] = useState<Executor[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
@@ -12,8 +24,7 @@ const ManagerRequestsPage: React.FC = () => {
   // Форма управления
   const [response, setResponse] = useState('');
   const [newStatus, setNewStatus] = useState('');
-  const [assignedTo, setAssignedTo] = useState('');
-  const [assignedPosition, setAssignedPosition] = useState('');
+  const [selectedExecutorId, setSelectedExecutorId] = useState('');
   const [deadline, setDeadline] = useState('');
   const [isFree, setIsFree] = useState(true);
   const [estimatedCost, setEstimatedCost] = useState('');
@@ -21,13 +32,17 @@ const ManagerRequestsPage: React.FC = () => {
   const [executorComment, setExecutorComment] = useState('');
 
   useEffect(() => {
-    loadRequests();
+    loadData();
   }, []);
 
-  const loadRequests = async () => {
+  const loadData = async () => {
     try {
-      const data = await requestsService.getAll();
-      setRequests(data);
+      const [requestsData, executorsData] = await Promise.all([
+        requestsService.getAll(),
+        usersService.getExecutors(),
+      ]);
+      setRequests(requestsData);
+      setExecutors(executorsData);
     } catch (error) {
       console.error('Ошибка загрузки:', error);
     } finally {
@@ -39,8 +54,7 @@ const ManagerRequestsPage: React.FC = () => {
     setSelectedRequest(req);
     setResponse(req.response || '');
     setNewStatus(req.status);
-    setAssignedTo(req.assignedTo || '');
-    setAssignedPosition(req.assignedPosition || '');
+    setSelectedExecutorId(req.executorId || '');
     setDeadline(req.deadline ? new Date(req.deadline).toISOString().slice(0, 16) : '');
     setIsFree(req.isFree ?? true);
     setEstimatedCost(req.estimatedCost?.toString() || '');
@@ -52,11 +66,17 @@ const ManagerRequestsPage: React.FC = () => {
     if (!selectedRequest) return;
 
     try {
+      const selectedExecutor = executors.find(e => e.id === selectedExecutorId);
+      const assignedTo = selectedExecutor 
+        ? `${selectedExecutor.lastName} ${selectedExecutor.firstName.charAt(0)}.${selectedExecutor.middleName?.charAt(0) || ''}.`
+        : undefined;
+
       const updateData: any = {
-        status: newStatus,
+        status: selectedExecutorId ? 'assigned' : newStatus,
         response,
-        assignedTo: assignedTo || undefined,
-        assignedPosition: assignedPosition || undefined,
+        executorId: selectedExecutorId || undefined,
+        assignedTo,
+        assignedPosition: selectedExecutor?.position,
         deadline: deadline ? new Date(deadline).toISOString() : undefined,
         isFree,
         estimatedCost: estimatedCost ? parseFloat(estimatedCost) : undefined,
@@ -69,7 +89,7 @@ const ManagerRequestsPage: React.FC = () => {
       alert('✅ Заявка обновлена!');
       setSelectedRequest(null);
       resetForm();
-      loadRequests();
+      loadData();
     } catch (error) {
       console.error('Ошибка обновления:', error);
       alert('❌ Ошибка обновления заявки');
@@ -79,8 +99,7 @@ const ManagerRequestsPage: React.FC = () => {
   const resetForm = () => {
     setResponse('');
     setNewStatus('');
-    setAssignedTo('');
-    setAssignedPosition('');
+    setSelectedExecutorId('');
     setDeadline('');
     setIsFree(true);
     setEstimatedCost('');
@@ -115,6 +134,8 @@ const ManagerRequestsPage: React.FC = () => {
   const getStatusBadge = (status: string) => {
     const styles: Record<string, any> = {
       new: { bg: '#e3f2fd', color: '#1976d2', text: 'Новая' },
+      assigned: { bg: '#fff3e0', color: '#f57c00', text: 'Назначена' },
+      accepted: { bg: '#e1f5fe', color: '#0288d1', text: 'Принята' },
       in_progress: { bg: '#fff3e0', color: '#f57c00', text: 'В работе' },
       completed: { bg: '#e8f5e9', color: '#388e3c', text: 'Выполнена' },
       rejected: { bg: '#ffebee', color: '#d32f2f', text: 'Отклонена' },
@@ -128,7 +149,8 @@ const ManagerRequestsPage: React.FC = () => {
   const stats = {
     all: requests.length,
     new: requests.filter(r => r.status === 'new').length,
-    in_progress: requests.filter(r => r.status === 'in_progress').length,
+    assigned: requests.filter(r => r.status === 'assigned').length,
+    in_progress: requests.filter(r => r.status === 'in_progress' || r.status === 'accepted').length,
     completed: requests.filter(r => r.status === 'completed').length,
   };
 
@@ -154,6 +176,10 @@ const ManagerRequestsPage: React.FC = () => {
             <div style={styles.statLabel}>Новых</div>
           </div>
           <div style={styles.statCard}>
+            <div style={styles.statValue}>{stats.assigned}</div>
+            <div style={styles.statLabel}>Назначено</div>
+          </div>
+          <div style={styles.statCard}>
             <div style={styles.statValue}>{stats.in_progress}</div>
             <div style={styles.statLabel}>В работе</div>
           </div>
@@ -166,6 +192,7 @@ const ManagerRequestsPage: React.FC = () => {
         <section style={styles.filtersSection}>
           <button onClick={() => setFilter('all')} style={filter === 'all' ? styles.filterActive : styles.filter}>Все</button>
           <button onClick={() => setFilter('new')} style={filter === 'new' ? styles.filterActive : styles.filter}>Новые</button>
+          <button onClick={() => setFilter('assigned')} style={filter === 'assigned' ? styles.filterActive : styles.filter}>Назначено</button>
           <button onClick={() => setFilter('in_progress')} style={filter === 'in_progress' ? styles.filterActive : styles.filter}>В работе</button>
           <button onClick={() => setFilter('completed')} style={filter === 'completed' ? styles.filterActive : styles.filter}>Выполненные</button>
         </section>
@@ -202,7 +229,7 @@ const ManagerRequestsPage: React.FC = () => {
                 </div>
               )}
 
-              {req.estimatedCost && (
+              {req.estimatedCost !== undefined && (
                 <div style={styles.costBox}>
                   <strong>💰 Стоимость:</strong> {req.isFree ? 'Бесплатно' : `${req.estimatedCost.toLocaleString('ru-RU')} ₽`}
                 </div>
@@ -240,28 +267,14 @@ const ManagerRequestsPage: React.FC = () => {
 
             <div style={styles.formGrid}>
               <div style={styles.inputGroup}>
-                <label style={styles.label}>Статус</label>
-                <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)} style={styles.select}>
-                  <option value="new">Новая</option>
-                  <option value="in_progress">В работе</option>
-                  <option value="completed">Выполнена</option>
-                  <option value="rejected">Отклонена</option>
-                </select>
-              </div>
-
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>Исполнитель (ФИО)</label>
-                <input value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} style={styles.input} placeholder="Иванов И.И." />
-              </div>
-
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>Должность</label>
-                <select value={assignedPosition} onChange={(e) => setAssignedPosition(e.target.value)} style={styles.select}>
-                  <option value="">Выберите...</option>
-                  <option value="Сантехник">Сантехник</option>
-                  <option value="Электрик">Электрик</option>
-                  <option value="Слесарь">Слесарь</option>
-                  <option value="Мастер">Мастер</option>
+                <label style={styles.label}>Назначить исполнителя</label>
+                <select value={selectedExecutorId} onChange={(e) => setSelectedExecutorId(e.target.value)} style={styles.select}>
+                  <option value="">Не назначен</option>
+                  {executors.map((executor) => (
+                    <option key={executor.id} value={executor.id}>
+                      {executor.lastName} {executor.firstName} - {executor.position} (⭐ {executor.rating}/5)
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -291,8 +304,8 @@ const ManagerRequestsPage: React.FC = () => {
             </div>
 
             <div style={styles.inputGroup}>
-              <label style={styles.label}>Комментарий исполнителя</label>
-              <textarea value={executorComment} onChange={(e) => setExecutorComment(e.target.value)} style={styles.textarea} rows={2} placeholder="Комментарий..." />
+              <label style={styles.label}>Комментарий для исполнителя</label>
+              <textarea value={executorComment} onChange={(e) => setExecutorComment(e.target.value)} style={styles.textarea} rows={2} placeholder="Особые указания..." />
             </div>
 
             <div style={styles.inputGroup}>
@@ -318,7 +331,7 @@ const styles: Record<string, React.CSSProperties> = {
   backLink: { color: 'white', textDecoration: 'none', fontSize: '16px' },
   title: { fontSize: '24px', fontWeight: 'bold', color: 'white', margin: 0 },
   main: { maxWidth: '1400px', margin: '0 auto', padding: '32px 20px' },
-  statsSection: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' },
+  statsSection: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '32px' },
   statCard: { backgroundColor: 'white', padding: '20px', borderRadius: '8px', textAlign: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
   statValue: { fontSize: '32px', fontWeight: 'bold', color: '#2c3e50', marginBottom: '8px' },
   statLabel: { fontSize: '14px', color: '#666' },

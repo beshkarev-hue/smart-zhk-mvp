@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -13,51 +13,40 @@ export class UsersService {
 
   async create(userData: Partial<User>): Promise<User> {
     const hashedPassword = await bcrypt.hash(userData.password, 10);
-    
     const user = this.usersRepository.create({
       ...userData,
       password: hashedPassword,
     });
-
     return this.usersRepository.save(user);
-  }
-
-  async findAll(): Promise<User[]> {
-    return this.usersRepository.find({
-      select: ['id', 'email', 'firstName', 'lastName', 'role', 'phone', 'apartmentNumber', 'buildingAddress', 'isActive', 'createdAt'],
-    });
-  }
-
-  async findOne(id: string): Promise<User> {
-    const user = await this.usersRepository.findOne({ 
-      where: { id },
-      select: ['id', 'email', 'firstName', 'lastName', 'middleName', 'role', 'phone', 'apartmentNumber', 'buildingAddress', 'isActive', 'createdAt'],
-    });
-
-    if (!user) {
-      throw new NotFoundException(`Пользователь с ID ${id} не найден`);
-    }
-
-    return user;
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
     return this.usersRepository.findOne({ where: { email } });
   }
 
-  async update(id: string, userData: Partial<User>): Promise<User> {
-    const user = await this.findOne(id);
-
-    if (userData.password) {
-      userData.password = await bcrypt.hash(userData.password, 10);
-    }
-
-    Object.assign(user, userData);
-    return this.usersRepository.save(user);
+  async findById(id: string): Promise<User | undefined> {
+    return this.usersRepository.findOne({ where: { id } });
   }
 
-  async remove(id: string): Promise<void> {
-    const user = await this.findOne(id);
-    await this.usersRepository.remove(user);
+  async findByRole(role: string): Promise<User[]> {
+    return this.usersRepository.find({
+      where: { role: role as any, isActive: true },
+      select: ['id', 'email', 'firstName', 'lastName', 'middleName', 'position', 'photoUrl', 'rating', 'ratingsCount', 'phone'],
+      order: { rating: 'DESC' },
+    });
+  }
+
+  async updateRating(userId: string, newRating: number): Promise<void> {
+    const user = await this.findById(userId);
+    if (!user) return;
+
+    const totalRating = user.rating * user.ratingsCount + newRating;
+    const newCount = user.ratingsCount + 1;
+    const avgRating = totalRating / newCount;
+
+    await this.usersRepository.update(userId, {
+      rating: avgRating,
+      ratingsCount: newCount,
+    });
   }
 }

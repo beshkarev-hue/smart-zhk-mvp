@@ -30,35 +30,30 @@ let UsersService = class UsersService {
         });
         return this.usersRepository.save(user);
     }
-    async findAll() {
-        return this.usersRepository.find({
-            select: ['id', 'email', 'firstName', 'lastName', 'role', 'phone', 'apartmentNumber', 'buildingAddress', 'isActive', 'createdAt'],
-        });
-    }
-    async findOne(id) {
-        const user = await this.usersRepository.findOne({
-            where: { id },
-            select: ['id', 'email', 'firstName', 'lastName', 'middleName', 'role', 'phone', 'apartmentNumber', 'buildingAddress', 'isActive', 'createdAt'],
-        });
-        if (!user) {
-            throw new common_1.NotFoundException(`Пользователь с ID ${id} не найден`);
-        }
-        return user;
-    }
     async findByEmail(email) {
         return this.usersRepository.findOne({ where: { email } });
     }
-    async update(id, userData) {
-        const user = await this.findOne(id);
-        if (userData.password) {
-            userData.password = await bcrypt.hash(userData.password, 10);
-        }
-        Object.assign(user, userData);
-        return this.usersRepository.save(user);
+    async findById(id) {
+        return this.usersRepository.findOne({ where: { id } });
     }
-    async remove(id) {
-        const user = await this.findOne(id);
-        await this.usersRepository.remove(user);
+    async findByRole(role) {
+        return this.usersRepository.find({
+            where: { role: role, isActive: true },
+            select: ['id', 'email', 'firstName', 'lastName', 'middleName', 'position', 'photoUrl', 'rating', 'ratingsCount', 'phone'],
+            order: { rating: 'DESC' },
+        });
+    }
+    async updateRating(userId, newRating) {
+        const user = await this.findById(userId);
+        if (!user)
+            return;
+        const totalRating = user.rating * user.ratingsCount + newRating;
+        const newCount = user.ratingsCount + 1;
+        const avgRating = totalRating / newCount;
+        await this.usersRepository.update(userId, {
+            rating: avgRating,
+            ratingsCount: newCount,
+        });
     }
 };
 exports.UsersService = UsersService;

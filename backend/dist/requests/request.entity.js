@@ -14,6 +14,8 @@ const typeorm_1 = require("typeorm");
 var RequestStatus;
 (function (RequestStatus) {
     RequestStatus["NEW"] = "new";
+    RequestStatus["ASSIGNED"] = "assigned";
+    RequestStatus["ACCEPTED"] = "accepted";
     RequestStatus["IN_PROGRESS"] = "in_progress";
     RequestStatus["COMPLETED"] = "completed";
     RequestStatus["REJECTED"] = "rejected";
@@ -76,11 +78,27 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
+], Request.prototype, "executorId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
 ], Request.prototype, "assignedTo", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], Request.prototype, "assignedPosition", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: false }),
+    __metadata("design:type", Boolean)
+], Request.prototype, "executorAccepted", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: false }),
+    __metadata("design:type", Boolean)
+], Request.prototype, "executorRejected", void 0);
+__decorate([
+    (0, typeorm_1.Column)('text', { nullable: true }),
+    __metadata("design:type", String)
+], Request.prototype, "executorRejectionReason", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
     __metadata("design:type", Date)
@@ -89,6 +107,10 @@ __decorate([
     (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, nullable: true }),
     __metadata("design:type", Number)
 ], Request.prototype, "estimatedCost", void 0);
+__decorate([
+    (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, nullable: true }),
+    __metadata("design:type", Number)
+], Request.prototype, "finalCost", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: false }),
     __metadata("design:type", Boolean)
@@ -104,11 +126,19 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)('text', { nullable: true }),
     __metadata("design:type", String)
+], Request.prototype, "residentRejectionReason", void 0);
+__decorate([
+    (0, typeorm_1.Column)('text', { nullable: true }),
+    __metadata("design:type", String)
 ], Request.prototype, "executorComment", void 0);
 __decorate([
     (0, typeorm_1.Column)('text', { nullable: true }),
     __metadata("design:type", String)
 ], Request.prototype, "residentComment", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Number)
+], Request.prototype, "executorRating", void 0);
 __decorate([
     (0, typeorm_1.Column)('simple-array', { nullable: true }),
     __metadata("design:type", Array)

@@ -1,15 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../../services/api';
+import { authService, requestsService } from '../../services/api';
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
+  const [stats, setStats] = useState({
+    activeRequests: 0,
+    hasUpdates: false,
+  });
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
+    loadStats();
   }, []);
+
+  const loadStats = async () => {
+    try {
+      const requests = await requestsService.getByUser(authService.getCurrentUser()?.id || '');
+      const active = requests.filter((r: any) => r.status === 'new' || r.status === 'in_progress').length;
+      const hasUpdates = requests.some((r: any) => 
+        (r.response || r.assignedTo || r.executorComment) && r.status !== 'completed'
+      );
+      
+      setStats({
+        activeRequests: active,
+        hasUpdates,
+      });
+    } catch (error) {
+      console.error('Ошибка загрузки:', error);
+    }
+  };
 
   const handleLogout = () => {
     authService.logout();
@@ -18,7 +40,6 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div style={styles.container}>
-      {/* Header */}
       <header style={styles.header}>
         <div style={styles.headerContent}>
           <h1 style={styles.logo}>Умное ЖКХ</h1>
@@ -30,7 +51,6 @@ const DashboardPage: React.FC = () => {
       </header>
 
       <main style={styles.main}>
-        {/* Welcome Section */}
         <section style={styles.welcomeSection}>
           <h2 style={styles.welcomeTitle}>
             Добро пожаловать, {user?.firstName || 'Пользователь'}!
@@ -42,7 +62,6 @@ const DashboardPage: React.FC = () => {
           )}
         </section>
 
-        {/* Stats Cards */}
         <section style={styles.statsSection}>
           <div style={styles.statCard}>
             <div style={styles.statIcon}>💳</div>
@@ -55,7 +74,7 @@ const DashboardPage: React.FC = () => {
           <div style={styles.statCard}>
             <div style={styles.statIcon}>📋</div>
             <div style={styles.statContent}>
-              <div style={styles.statValue}>0</div>
+              <div style={styles.statValue}>{stats.activeRequests}</div>
               <div style={styles.statLabel}>Активных заявок</div>
             </div>
           </div>
@@ -69,7 +88,6 @@ const DashboardPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Quick Actions */}
         <section style={styles.quickActionsSection}>
           <h3 style={styles.sectionTitle}>Быстрые действия</h3>
           <div style={styles.quickActionsGrid}>
@@ -83,9 +101,11 @@ const DashboardPage: React.FC = () => {
               <div style={styles.quickActionTitle}>Показания счётчиков</div>
             </button>
 
-            <button onClick={() => navigate('/resident/requests/new')} style={styles.quickActionCard}>
-              <div style={styles.quickActionIcon}>🔧</div>
-              <div style={styles.quickActionTitle}>Создать заявку</div>
+            <button onClick={() => navigate('/resident/requests')} style={styles.quickActionCard}>
+              <div style={styles.quickActionIcon}>📋</div>
+              <div style={styles.quickActionTitle}>Мои заявки</div>
+              {stats.activeRequests > 0 && <div style={styles.badge}>{stats.activeRequests}</div>}
+              {stats.hasUpdates && <div style={styles.updateBadge}>●</div>}
             </button>
 
             <button onClick={() => navigate('/resident/news')} style={styles.quickActionCard}>
@@ -100,13 +120,6 @@ const DashboardPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Recent Requests */}
-        <section style={styles.recentSection}>
-          <h3 style={styles.sectionTitle}>Последние заявки</h3>
-          <div style={styles.emptyState}>
-            <p style={styles.emptyText}>У вас пока нет заявок</p>
-          </div>
-        </section>
       </main>
     </div>
   );
@@ -133,12 +146,11 @@ const styles: Record<string, React.CSSProperties> = {
   quickActionsSection: { marginBottom: '40px' },
   sectionTitle: { fontSize: '20px', fontWeight: 'bold', marginBottom: '20px', marginTop: 0 },
   quickActionsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '16px' },
-  quickActionCard: { backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '8px', padding: '24px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s' },
+  quickActionCard: { position: 'relative', backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '8px', padding: '24px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s' },
   quickActionIcon: { fontSize: '48px', marginBottom: '12px' },
   quickActionTitle: { fontSize: '14px', fontWeight: '500', color: '#333' },
-  recentSection: {},
-  emptyState: { backgroundColor: 'white', borderRadius: '8px', padding: '40px', textAlign: 'center' },
-  emptyText: { fontSize: '16px', color: '#999', margin: 0 },
+  badge: { position: 'absolute', top: '10px', right: '10px', backgroundColor: '#007bff', color: 'white', borderRadius: '12px', padding: '4px 8px', fontSize: '12px', fontWeight: 'bold' },
+  updateBadge: { position: 'absolute', top: '10px', right: '10px', backgroundColor: '#e74c3c', color: '#e74c3c', borderRadius: '50%', width: '12px', height: '12px', fontSize: '24px', lineHeight: '0' },
 };
 
 export default DashboardPage;
