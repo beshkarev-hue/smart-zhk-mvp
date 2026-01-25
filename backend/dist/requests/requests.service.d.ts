@@ -1,13 +1,14 @@
 import { Repository } from 'typeorm';
-import { Request, RequestStatus } from './request.entity';
+import { Request } from './request.entity';
+import { UpdateRequestDto } from './dto/update-request.dto';
 export declare class RequestsService {
     private requestsRepository;
     constructor(requestsRepository: Repository<Request>);
-    create(requestData: Partial<Request>): Promise<Request>;
     findAll(): Promise<Request[]>;
-    findByUser(userId: string): Promise<Request[]>;
+    findByUserId(userId: string): Promise<Request[]>;
     findOne(id: string): Promise<Request>;
-    updateStatus(id: string, status: RequestStatus, response?: string): Promise<Request>;
-    update(id: string, requestData: Partial<Request>): Promise<Request>;
+    create(data: any): Promise<Request>;
+    update(id: string, updateRequestDto: UpdateRequestDto): Promise<Request>;
+    updateStatus(id: string, status: string, response?: string): Promise<Request>;
     remove(id: string): Promise<void>;
 }

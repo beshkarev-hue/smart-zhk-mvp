@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Request = exports.RequestType = exports.RequestStatus = void 0;
 const typeorm_1 = require("typeorm");
-const user_entity_1 = require("../users/user.entity");
 var RequestStatus;
 (function (RequestStatus) {
     RequestStatus["NEW"] = "new";
@@ -21,14 +20,11 @@ var RequestStatus;
 })(RequestStatus || (exports.RequestStatus = RequestStatus = {}));
 var RequestType;
 (function (RequestType) {
-    RequestType["REPAIR"] = "repair";
     RequestType["PLUMBING"] = "plumbing";
     RequestType["ELECTRICITY"] = "electricity";
     RequestType["HEATING"] = "heating";
     RequestType["CLEANING"] = "cleaning";
-    RequestType["GARBAGE"] = "garbage";
-    RequestType["ELEVATOR"] = "elevator";
-    RequestType["INTERCOM"] = "intercom";
+    RequestType["REPAIR"] = "repair";
     RequestType["OTHER"] = "other";
 })(RequestType || (exports.RequestType = RequestType = {}));
 let Request = class Request {
@@ -38,11 +34,6 @@ __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
     __metadata("design:type", String)
 ], Request.prototype, "id", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => user_entity_1.User),
-    (0, typeorm_1.JoinColumn)({ name: 'userId' }),
-    __metadata("design:type", user_entity_1.User)
-], Request.prototype, "user", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
@@ -79,13 +70,57 @@ __decorate([
     __metadata("design:type", String)
 ], Request.prototype, "buildingAddress", void 0);
 __decorate([
+    (0, typeorm_1.Column)('text', { nullable: true }),
+    __metadata("design:type", String)
+], Request.prototype, "response", void 0);
+__decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], Request.prototype, "assignedTo", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true, type: 'text' }),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
-], Request.prototype, "response", void 0);
+], Request.prototype, "assignedPosition", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Date)
+], Request.prototype, "deadline", void 0);
+__decorate([
+    (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, nullable: true }),
+    __metadata("design:type", Number)
+], Request.prototype, "estimatedCost", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: false }),
+    __metadata("design:type", Boolean)
+], Request.prototype, "isFree", void 0);
+__decorate([
+    (0, typeorm_1.Column)('text', { nullable: true }),
+    __metadata("design:type", String)
+], Request.prototype, "estimateDetails", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Boolean)
+], Request.prototype, "residentApproval", void 0);
+__decorate([
+    (0, typeorm_1.Column)('text', { nullable: true }),
+    __metadata("design:type", String)
+], Request.prototype, "executorComment", void 0);
+__decorate([
+    (0, typeorm_1.Column)('text', { nullable: true }),
+    __metadata("design:type", String)
+], Request.prototype, "residentComment", void 0);
+__decorate([
+    (0, typeorm_1.Column)('simple-array', { nullable: true }),
+    __metadata("design:type", Array)
+], Request.prototype, "photosBefore", void 0);
+__decorate([
+    (0, typeorm_1.Column)('simple-array', { nullable: true }),
+    __metadata("design:type", Array)
+], Request.prototype, "photosAfter", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: false }),
+    __metadata("design:type", Boolean)
+], Request.prototype, "isPaid", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
@@ -94,6 +129,10 @@ __decorate([
     (0, typeorm_1.UpdateDateColumn)(),
     __metadata("design:type", Date)
 ], Request.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Date)
+], Request.prototype, "completedAt", void 0);
 exports.Request = Request = __decorate([
     (0, typeorm_1.Entity)('requests')
 ], Request);

@@ -16,5 +16,4 @@ export declare class User {
     buildingAddress: string;
     isActive: boolean;
     createdAt: Date;
-    updatedAt: Date;
 }

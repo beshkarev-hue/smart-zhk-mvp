@@ -5,7 +5,7 @@ export declare class RequestsController {
     constructor(requestsService: RequestsService);
     create(requestData: Partial<Request>): Promise<Request>;
     findAll(): Promise<Request[]>;
-    findByUser(userId: string): Promise<Request[]>;
+    findByUserId(userId: string): Promise<Request[]>;
     findOne(id: string): Promise<Request>;
     updateStatus(id: string, data: {
         status: RequestStatus;

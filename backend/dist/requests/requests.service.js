@@ -21,48 +21,38 @@ let RequestsService = class RequestsService {
     constructor(requestsRepository) {
         this.requestsRepository = requestsRepository;
     }
-    async create(requestData) {
-        const request = this.requestsRepository.create(requestData);
-        return this.requestsRepository.save(request);
-    }
     async findAll() {
         return this.requestsRepository.find({
-            relations: ['user'],
             order: { createdAt: 'DESC' },
         });
     }
-    async findByUser(userId) {
+    async findByUserId(userId) {
         return this.requestsRepository.find({
             where: { userId },
             order: { createdAt: 'DESC' },
         });
     }
     async findOne(id) {
-        const request = await this.requestsRepository.findOne({
-            where: { id },
-            relations: ['user'],
-        });
-        if (!request) {
-            throw new common_1.NotFoundException(`Заявка с ID ${id} не найдена`);
-        }
-        return request;
+        return this.requestsRepository.findOne({ where: { id } });
+    }
+    async create(data) {
+        const request = this.requestsRepository.create(data);
+        const saved = await this.requestsRepository.save(request);
+        return Array.isArray(saved) ? saved[0] : saved;
+    }
+    async update(id, updateRequestDto) {
+        await this.requestsRepository.update(id, updateRequestDto);
+        return this.requestsRepository.findOne({ where: { id } });
     }
     async updateStatus(id, status, response) {
-        const request = await this.findOne(id);
-        request.status = status;
-        if (response) {
-            request.response = response;
-        }
-        return this.requestsRepository.save(request);
-    }
-    async update(id, requestData) {
-        const request = await this.findOne(id);
-        Object.assign(request, requestData);
-        return this.requestsRepository.save(request);
+        await this.requestsRepository.update(id, {
+            status: status,
+            response
+        });
+        return this.requestsRepository.findOne({ where: { id } });
     }
     async remove(id) {
-        const request = await this.findOne(id);
-        await this.requestsRepository.remove(request);
+        await this.requestsRepository.delete(id);
     }
 };
 exports.RequestsService = RequestsService;

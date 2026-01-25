@@ -34,8 +34,8 @@ export class RequestsController {
 
   @Get('user/:userId')
   @ApiOperation({ summary: 'Получить заявки пользователя' })
-  async findByUser(@Param('userId') userId: string): Promise<Request[]> {
-    return this.requestsService.findByUser(userId);
+  async findByUserId(@Param('userId') userId: string): Promise<Request[]> {
+    return this.requestsService.findByUserId(userId);
   }
 
   @Get(':id')

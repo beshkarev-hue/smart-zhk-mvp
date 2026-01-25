@@ -1,7 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Request, RequestStatus } from './request.entity';
+import { CreateRequestDto } from './dto/create-request.dto';
+import { UpdateRequestDto } from './dto/update-request.dto';
 
 @Injectable()
 export class RequestsService {
@@ -10,19 +12,13 @@ export class RequestsService {
     private requestsRepository: Repository<Request>,
   ) {}
 
-  async create(requestData: Partial<Request>): Promise<Request> {
-    const request = this.requestsRepository.create(requestData);
-    return this.requestsRepository.save(request);
-  }
-
   async findAll(): Promise<Request[]> {
     return this.requestsRepository.find({
-      relations: ['user'],
       order: { createdAt: 'DESC' },
     });
   }
 
-  async findByUser(userId: string): Promise<Request[]> {
+  async findByUserId(userId: string): Promise<Request[]> {
     return this.requestsRepository.find({
       where: { userId },
       order: { createdAt: 'DESC' },
@@ -30,39 +26,29 @@ export class RequestsService {
   }
 
   async findOne(id: string): Promise<Request> {
-    const request = await this.requestsRepository.findOne({
-      where: { id },
-      relations: ['user'],
+    return this.requestsRepository.findOne({ where: { id } });
+  }
+
+  async create(data: any): Promise<Request> {
+    const request = this.requestsRepository.create(data);
+    const saved = await this.requestsRepository.save(request);
+    return Array.isArray(saved) ? saved[0] : saved;
+  }
+
+  async update(id: string, updateRequestDto: UpdateRequestDto): Promise<Request> {
+    await this.requestsRepository.update(id, updateRequestDto as any);
+    return this.requestsRepository.findOne({ where: { id } });
+  }
+
+  async updateStatus(id: string, status: string, response?: string): Promise<Request> {
+    await this.requestsRepository.update(id, { 
+      status: status as RequestStatus, 
+      response 
     });
-
-    if (!request) {
-      throw new NotFoundException(`Заявка с ID ${id} не найдена`);
-    }
-
-    return request;
-  }
-
-  async updateStatus(
-    id: string,
-    status: RequestStatus,
-    response?: string,
-  ): Promise<Request> {
-    const request = await this.findOne(id);
-    request.status = status;
-    if (response) {
-      request.response = response;
-    }
-    return this.requestsRepository.save(request);
-  }
-
-  async update(id: string, requestData: Partial<Request>): Promise<Request> {
-    const request = await this.findOne(id);
-    Object.assign(request, requestData);
-    return this.requestsRepository.save(request);
+    return this.requestsRepository.findOne({ where: { id } });
   }
 
   async remove(id: string): Promise<void> {
-    const request = await this.findOne(id);
-    await this.requestsRepository.remove(request);
+    await this.requestsRepository.delete(id);
   }
 }

@@ -27,8 +27,8 @@ let RequestsController = class RequestsController {
     async findAll() {
         return this.requestsService.findAll();
     }
-    async findByUser(userId) {
-        return this.requestsService.findByUser(userId);
+    async findByUserId(userId) {
+        return this.requestsService.findByUserId(userId);
     }
     async findOne(id) {
         return this.requestsService.findOne(id);
@@ -66,7 +66,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], RequestsController.prototype, "findByUser", null);
+], RequestsController.prototype, "findByUserId", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Получить заявку по ID' }),

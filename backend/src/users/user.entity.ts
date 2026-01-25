@@ -1,15 +1,9 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 export enum UserRole {
-  RESIDENT = 'resident',      // Жилец
-  MANAGER = 'manager',        // Сотрудник УК
-  ADMIN = 'admin',           // Администратор
+  RESIDENT = 'resident',
+  MANAGER = 'manager',
+  ADMIN = 'admin',
 }
 
 @Entity('users')
@@ -53,7 +47,4 @@ export class User {
 
   @CreateDateColumn()
   createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

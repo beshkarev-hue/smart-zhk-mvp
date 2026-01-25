@@ -15,12 +15,20 @@ import NewsPage from './pages/resident/NewsPage';
 import ProfilePage from './pages/resident/ProfilePage';
 import MetersPage from './pages/resident/MetersPage';
 
-// Protected Route Component
-const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+// Manager pages
+import ManagerDashboardPage from './pages/manager/ManagerDashboardPage';
+import ManagerRequestsPage from './pages/manager/ManagerRequestsPage';
+
+const ProtectedRoute: React.FC<{ children: React.ReactElement; allowedRoles?: string[] }> = ({ children, allowedRoles }) => {
   const isAuthenticated = authService.isAuthenticated();
+  const user = authService.getCurrentUser();
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    return <Navigate to={`/${user.role}/dashboard`} replace />;
   }
   
   return children;
@@ -30,20 +38,22 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
         {/* Resident routes */}
-        <Route path="/resident/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-        <Route path="/resident/payments" element={<ProtectedRoute><PaymentsPage /></ProtectedRoute>} />
-        <Route path="/resident/requests" element={<ProtectedRoute><RequestsPage /></ProtectedRoute>} />
-        <Route path="/resident/requests/new" element={<ProtectedRoute><CreateRequestPage /></ProtectedRoute>} />
-        <Route path="/resident/news" element={<ProtectedRoute><NewsPage /></ProtectedRoute>} />
-        <Route path="/resident/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-        <Route path="/resident/meters" element={<ProtectedRoute><MetersPage /></ProtectedRoute>} />
+        <Route path="/resident/dashboard" element={<ProtectedRoute allowedRoles={['resident']}><DashboardPage /></ProtectedRoute>} />
+        <Route path="/resident/payments" element={<ProtectedRoute allowedRoles={['resident']}><PaymentsPage /></ProtectedRoute>} />
+        <Route path="/resident/requests" element={<ProtectedRoute allowedRoles={['resident']}><RequestsPage /></ProtectedRoute>} />
+        <Route path="/resident/requests/new" element={<ProtectedRoute allowedRoles={['resident']}><CreateRequestPage /></ProtectedRoute>} />
+        <Route path="/resident/news" element={<ProtectedRoute allowedRoles={['resident']}><NewsPage /></ProtectedRoute>} />
+        <Route path="/resident/profile" element={<ProtectedRoute allowedRoles={['resident']}><ProfilePage /></ProtectedRoute>} />
+        <Route path="/resident/meters" element={<ProtectedRoute allowedRoles={['resident']}><MetersPage /></ProtectedRoute>} />
 
-        {/* Default redirect */}
+        {/* Manager routes */}
+        <Route path="/manager/requests" element={<ProtectedRoute allowedRoles={['manager', 'admin']}><ManagerRequestsPage /></ProtectedRoute>} />
+        <Route path="/manager/dashboard" element={<ProtectedRoute allowedRoles={['manager', 'admin']}><ManagerDashboardPage /></ProtectedRoute>} />
+
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

@@ -1,13 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm';
-import { User } from '../users/user.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export enum RequestStatus {
   NEW = 'new',
@@ -17,25 +8,18 @@ export enum RequestStatus {
 }
 
 export enum RequestType {
-  REPAIR = 'repair',              // Ремонт
-  PLUMBING = 'plumbing',          // Сантехника
-  ELECTRICITY = 'electricity',     // Электрика
-  HEATING = 'heating',            // Отопление
-  CLEANING = 'cleaning',          // Уборка
-  GARBAGE = 'garbage',            // Вывоз мусора
-  ELEVATOR = 'elevator',          // Лифт
-  INTERCOM = 'intercom',          // Домофон
-  OTHER = 'other',                // Другое
+  PLUMBING = 'plumbing',
+  ELECTRICITY = 'electricity',
+  HEATING = 'heating',
+  CLEANING = 'cleaning',
+  REPAIR = 'repair',
+  OTHER = 'other',
 }
 
 @Entity('requests')
 export class Request {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  user: User;
 
   @Column()
   userId: string;
@@ -65,15 +49,52 @@ export class Request {
   @Column({ nullable: true })
   buildingAddress: string;
 
-  @Column({ nullable: true })
-  assignedTo: string; // ID сотрудника УК
-
-  @Column({ nullable: true, type: 'text' })
+  @Column('text', { nullable: true })
   response: string;
+
+  // Новые поля для расширенного функционала
+  @Column({ nullable: true })
+  assignedTo: string; // ФИО исполнителя
+
+  @Column({ nullable: true })
+  assignedPosition: string; // Должность (Сантехник, Электрик)
+
+  @Column({ type: 'timestamp', nullable: true })
+  deadline: Date; // Срок исполнения
+
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  estimatedCost: number; // Стоимость работ
+
+  @Column({ default: false })
+  isFree: boolean; // Бесплатно или платно
+
+  @Column('text', { nullable: true })
+  estimateDetails: string; // Детали сметы
+
+  @Column({ nullable: true })
+  residentApproval: boolean; // Согласие жильца (null = не рассмотрено)
+
+  @Column('text', { nullable: true })
+  executorComment: string; // Комментарий исполнителя
+
+  @Column('text', { nullable: true })
+  residentComment: string; // Комментарий жильца
+
+  @Column('simple-array', { nullable: true })
+  photosBefore: string[]; // Фото до работ
+
+  @Column('simple-array', { nullable: true })
+  photosAfter: string[]; // Фото после работ
+
+  @Column({ default: false })
+  isPaid: boolean; // Оплачено
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  completedAt: Date; // Дата завершения
 }

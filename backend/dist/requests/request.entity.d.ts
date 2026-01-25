@@ -1,4 +1,3 @@
-import { User } from '../users/user.entity';
 export declare enum RequestStatus {
     NEW = "new",
     IN_PROGRESS = "in_progress",
@@ -6,19 +5,15 @@ export declare enum RequestStatus {
     REJECTED = "rejected"
 }
 export declare enum RequestType {
-    REPAIR = "repair",
     PLUMBING = "plumbing",
     ELECTRICITY = "electricity",
     HEATING = "heating",
     CLEANING = "cleaning",
-    GARBAGE = "garbage",
-    ELEVATOR = "elevator",
-    INTERCOM = "intercom",
+    REPAIR = "repair",
     OTHER = "other"
 }
 export declare class Request {
     id: string;
-    user: User;
     userId: string;
     type: RequestType;
     title: string;
@@ -26,8 +21,20 @@ export declare class Request {
     status: RequestStatus;
     apartmentNumber: string;
     buildingAddress: string;
-    assignedTo: string;
     response: string;
+    assignedTo: string;
+    assignedPosition: string;
+    deadline: Date;
+    estimatedCost: number;
+    isFree: boolean;
+    estimateDetails: string;
+    residentApproval: boolean;
+    executorComment: string;
+    residentComment: string;
+    photosBefore: string[];
+    photosAfter: string[];
+    isPaid: boolean;
     createdAt: Date;
     updatedAt: Date;
+    completedAt: Date;
 }
