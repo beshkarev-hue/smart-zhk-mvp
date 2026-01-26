@@ -19,18 +19,28 @@ const DashboardPage: React.FC = () => {
   const loadStats = async () => {
     try {
       const requests = await requestsService.getByUser(authService.getCurrentUser()?.id || '');
-      const active = requests.filter((r: any) => r.status === 'new' || r.status === 'in_progress').length;
-      const hasUpdates = requests.some((r: any) => 
-        (r.response || r.assignedTo || r.executorComment) && r.status !== 'completed'
+      const active = requests.filter((r: any) => r.status === 'new' || r.status === 'assigned' || r.status === 'accepted' || r.status === 'in_progress').length;
+      
+      // Проверяем есть ли непросмотренные обновления
+      const lastVisit = localStorage.getItem('resident_last_visit') || '0';
+      const hasNew = requests.some((r: any) => 
+        (r.response || r.assignedTo || r.executorComment || r.status === 'completed') &&
+        new Date(r.updatedAt || r.createdAt).getTime() > parseInt(lastVisit)
       );
       
       setStats({
         activeRequests: active,
-        hasUpdates,
+        hasUpdates: hasNew,
       });
     } catch (error) {
       console.error('Ошибка загрузки:', error);
     }
+  };
+
+  const handleNavigateToRequests = () => {
+    // Сохраняем время посещения
+    localStorage.setItem('resident_last_visit', Date.now().toString());
+    navigate('/resident/requests');
   };
 
   const handleLogout = () => {
@@ -42,7 +52,7 @@ const DashboardPage: React.FC = () => {
     <div style={styles.container}>
       <header style={styles.header}>
         <div style={styles.headerContent}>
-          <h1 style={styles.logo}>Умное ЖКХ</h1>
+          <h1 style={styles.logo}>Отта</h1>
           <div style={styles.headerRight}>
             <span style={styles.userName}>{user?.firstName || 'Пользователь'}</span>
             <button onClick={handleLogout} style={styles.logoutButton}>Выход</button>
@@ -101,11 +111,11 @@ const DashboardPage: React.FC = () => {
               <div style={styles.quickActionTitle}>Показания счётчиков</div>
             </button>
 
-            <button onClick={() => navigate('/resident/requests')} style={styles.quickActionCard}>
+            <button onClick={handleNavigateToRequests} style={styles.quickActionCard}>
               <div style={styles.quickActionIcon}>📋</div>
               <div style={styles.quickActionTitle}>Мои заявки</div>
               {stats.activeRequests > 0 && <div style={styles.badge}>{stats.activeRequests}</div>}
-              {stats.hasUpdates && <div style={styles.updateBadge}>●</div>}
+              {stats.hasUpdates && <div style={styles.updateBadge}></div>}
             </button>
 
             <button onClick={() => navigate('/resident/news')} style={styles.quickActionCard}>
@@ -119,7 +129,6 @@ const DashboardPage: React.FC = () => {
             </button>
           </div>
         </section>
-
       </main>
     </div>
   );
@@ -150,7 +159,7 @@ const styles: Record<string, React.CSSProperties> = {
   quickActionIcon: { fontSize: '48px', marginBottom: '12px' },
   quickActionTitle: { fontSize: '14px', fontWeight: '500', color: '#333' },
   badge: { position: 'absolute', top: '10px', right: '10px', backgroundColor: '#007bff', color: 'white', borderRadius: '12px', padding: '4px 8px', fontSize: '12px', fontWeight: 'bold' },
-  updateBadge: { position: 'absolute', top: '10px', right: '10px', backgroundColor: '#e74c3c', color: '#e74c3c', borderRadius: '50%', width: '12px', height: '12px', fontSize: '24px', lineHeight: '0' },
+  updateBadge: { position: 'absolute', top: '10px', right: '10px', backgroundColor: '#e74c3c', borderRadius: '50%', width: '12px', height: '12px' },
 };
 
 export default DashboardPage;

@@ -162,7 +162,7 @@ const ExecutorDashboardPage: React.FC = () => {
     <div style={styles.container}>
       <header style={styles.header}>
         <div style={styles.headerContent}>
-          <h1 style={styles.logo}>Умное ЖКХ - Исполнитель</h1>
+          <h1 style={styles.logo}>Отта - Исполнитель</h1>
           <div style={styles.headerRight}>
             <div style={styles.userInfo}>
               <div style={styles.userName}>{user?.firstName} {user?.lastName}</div>
