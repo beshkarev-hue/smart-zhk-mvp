@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, UseGuards, Request } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -16,5 +16,12 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   async getExecutors() {
     return this.usersService.findByRole('executor');
+  }
+
+  @Post(':id/rating')
+  @UseGuards(JwtAuthGuard)
+  async updateRating(@Param('id') id: string, @Body() body: { rating: number }) {
+    await this.usersService.updateRating(id, body.rating);
+    return { message: 'Rating updated' };
   }
 }

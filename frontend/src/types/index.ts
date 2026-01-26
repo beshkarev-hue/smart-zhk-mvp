@@ -48,6 +48,7 @@ export enum RequestStatus {
   IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   REJECTED = 'rejected',
+  CLOSED = 'closed',
 }
 
 export enum RequestType {
@@ -91,6 +92,7 @@ export interface Request {
   createdAt: string;
   updatedAt?: string;
   completedAt?: string;
+  closedAt?: string;
 }
 
 // Payment types

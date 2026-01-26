@@ -16,19 +16,19 @@ const LoginPage: React.FC = () => {
 
     try {
       const response = await authService.login({ email, password });
-      console.log('✅ Успешный вход:', response.user);
       
       // Редирект в зависимости от роли
       if (response.user.role === 'resident') {
         navigate('/resident/dashboard');
       } else if (response.user.role === 'manager') {
         navigate('/manager/dashboard');
+      } else if (response.user.role === 'executor') {
+        navigate('/executor/dashboard');
       } else {
         navigate('/');
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Ошибка входа. Проверьте данные.');
-      console.error('❌ Ошибка входа:', err);
     } finally {
       setLoading(false);
     }
@@ -40,18 +40,22 @@ const LoginPage: React.FC = () => {
         <h1 style={styles.title}>Вход в систему</h1>
         <p style={styles.subtitle}>Умная ЖКХ платформа</p>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          {error && <div style={styles.error}>{error}</div>}
+        {error && (
+          <div style={styles.error}>
+            {error}
+          </div>
+        )}
 
+        <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
             <label style={styles.label}>Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
               style={styles.input}
-              placeholder="example@mail.ru"
+              required
+              disabled={loading}
             />
           </div>
 
@@ -61,26 +65,19 @@ const LoginPage: React.FC = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
               style={styles.input}
-              placeholder="••••••••"
+              required
+              disabled={loading}
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              ...styles.button,
-              ...(loading ? styles.buttonDisabled : {}),
-            }}
-          >
+          <button type="submit" style={styles.button} disabled={loading}>
             {loading ? 'Вход...' : 'Войти'}
           </button>
         </form>
 
-        <p style={styles.link}>
-          Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+        <p style={styles.footer}>
+          Нет аккаунта? <Link to="/register" style={styles.link}>Зарегистрироваться</Link>
         </p>
       </div>
     </div>
@@ -94,49 +91,63 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#f5f5f5',
-    padding: '20px',
   },
   card: {
     backgroundColor: 'white',
     borderRadius: '8px',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
     padding: '40px',
     width: '100%',
     maxWidth: '400px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
   },
   title: {
-    fontSize: '24px',
+    fontSize: '28px',
     fontWeight: 'bold',
-    marginBottom: '8px',
     textAlign: 'center',
+    marginBottom: '8px',
+    marginTop: 0,
   },
   subtitle: {
+    fontSize: '16px',
     color: '#666',
+    textAlign: 'center',
     marginBottom: '32px',
+    marginTop: 0,
+  },
+  error: {
+    backgroundColor: '#ffebee',
+    color: '#c62828',
+    padding: '12px',
+    borderRadius: '4px',
+    marginBottom: '20px',
+    fontSize: '14px',
     textAlign: 'center',
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '20px',
   },
   inputGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
+    marginBottom: '20px',
   },
   label: {
+    display: 'block',
     fontSize: '14px',
     fontWeight: '500',
+    marginBottom: '8px',
+    color: '#333',
   },
   input: {
+    width: '100%',
     padding: '12px',
     border: '1px solid #ddd',
     borderRadius: '4px',
-    fontSize: '16px',
+    fontSize: '14px',
+    boxSizing: 'border-box',
   },
   button: {
-    padding: '12px',
+    width: '100%',
+    padding: '14px',
     backgroundColor: '#007bff',
     color: 'white',
     border: 'none',
@@ -146,21 +157,15 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     marginTop: '8px',
   },
-  buttonDisabled: {
-    opacity: 0.6,
-    cursor: 'not-allowed',
-  },
-  error: {
-    padding: '12px',
-    backgroundColor: '#fee',
-    color: '#c33',
-    borderRadius: '4px',
+  footer: {
+    textAlign: 'center',
+    marginTop: '24px',
     fontSize: '14px',
+    color: '#666',
   },
   link: {
-    marginTop: '20px',
-    textAlign: 'center',
-    fontSize: '14px',
+    color: '#007bff',
+    textDecoration: 'none',
   },
 };
 

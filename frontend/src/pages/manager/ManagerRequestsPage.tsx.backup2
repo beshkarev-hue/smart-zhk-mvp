@@ -21,6 +21,7 @@ const ManagerRequestsPage: React.FC = () => {
   const [filter, setFilter] = useState('all');
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   
+  // Форма управления
   const [response, setResponse] = useState('');
   const [newStatus, setNewStatus] = useState('');
   const [selectedExecutorId, setSelectedExecutorId] = useState('');
@@ -46,18 +47,6 @@ const ManagerRequestsPage: React.FC = () => {
       console.error('Ошибка загрузки:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCloseRequest = async (requestId: string) => {
-    if (!window.confirm('Вы уверены что хотите закрыть заказ-наряд?')) return;
-    try {
-      await requestsService.update(requestId, { status: 'closed', closedAt: new Date().toISOString() });
-      alert('✅ Заказ-наряд закрыт!');
-      loadData();
-    } catch (error) {
-      console.error('Ошибка:', error);
-      alert('❌ Ошибка закрытия заказа');
     }
   };
 
@@ -149,28 +138,20 @@ const ManagerRequestsPage: React.FC = () => {
       accepted: { bg: '#e1f5fe', color: '#0288d1', text: 'Принята' },
       in_progress: { bg: '#fff3e0', color: '#f57c00', text: 'В работе' },
       completed: { bg: '#e8f5e9', color: '#388e3c', text: 'Выполнена' },
-      closed: { bg: '#f5f5f5', color: '#757575', text: 'Закрыта' },
       rejected: { bg: '#ffebee', color: '#d32f2f', text: 'Отклонена' },
     };
     const s = styles[status] || styles.new;
     return <span style={{ padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '500', backgroundColor: s.bg, color: s.color }}>{s.text}</span>;
   };
 
-  const filteredRequests = requests.filter(r => {
-    if (filter === 'all') return true;
-    if (filter === 'new') return r.status === 'new';
-    if (filter === 'assigned') return r.status === 'assigned';
-    if (filter === 'in_progress') return r.status === 'accepted' || r.status === 'in_progress';
-    if (filter === 'completed') return r.status === 'completed' || r.status === 'closed';
-    return true;
-  });
+  const filteredRequests = requests.filter(r => filter === 'all' || r.status === filter);
 
   const stats = {
     all: requests.length,
     new: requests.filter(r => r.status === 'new').length,
     assigned: requests.filter(r => r.status === 'assigned').length,
     in_progress: requests.filter(r => r.status === 'in_progress' || r.status === 'accepted').length,
-    completed: requests.filter(r => r.status === 'completed' || r.status === 'closed').length,
+    completed: requests.filter(r => r.status === 'completed').length,
   };
 
   if (loading) return <div style={styles.loading}>Загрузка...</div>;
@@ -248,7 +229,7 @@ const ManagerRequestsPage: React.FC = () => {
                 </div>
               )}
 
-              {req.estimatedCost !== undefined && req.estimatedCost !== null && (
+              {req.estimatedCost !== undefined && (
                 <div style={styles.costBox}>
                   <strong>💰 Стоимость:</strong> {req.isFree ? 'Бесплатно' : `${req.estimatedCost?.toLocaleString('ru-RU')} ₽`}
                 </div>
@@ -266,30 +247,9 @@ const ManagerRequestsPage: React.FC = () => {
                 </div>
               )}
 
-              {req.residentApproval !== null && req.residentApproval !== undefined && (
-                <div style={req.residentApproval ? styles.residentApprovedBox : styles.residentRejectedBox}>
-                  <strong>{req.residentApproval ? '✓ Работа принята жильцом' : '✗ Работа отклонена жильцом'}</strong>
-                  {req.executorRating && req.residentApproval && (
-                    <div style={styles.ratingDisplay}>
-                      Оценка исполнителя: {'⭐'.repeat(req.executorRating)} ({req.executorRating}/5)
-                    </div>
-                  )}
-                  {req.residentComment && <div style={styles.residentCommentText}>Комментарий жильца: {req.residentComment}</div>}
-                  {req.residentRejectionReason && <div style={styles.residentCommentText}>Причина отказа: {req.residentRejectionReason}</div>}
-                </div>
-              )}
-
-              {req.status === 'completed' && req.residentApproval && (
-                <button onClick={() => handleCloseRequest(req.id)} style={styles.closeButton}>
-                  Закрыть заказ-наряд
-                </button>
-              )}
-
-              {req.status !== 'closed' && (
-                <button onClick={() => handleOpenManage(req)} style={styles.manageButton}>
-                  Управление заявкой
-                </button>
-              )}
+              <button onClick={() => handleOpenManage(req)} style={styles.manageButton}>
+                Управление заявкой
+              </button>
             </div>
           ))}
 
@@ -394,11 +354,6 @@ const styles: Record<string, React.CSSProperties> = {
   costBox: { backgroundColor: '#fff3e0', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '12px', borderLeft: '4px solid #ff9800' },
   responseBox: { backgroundColor: '#e8f5e9', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '12px', borderLeft: '4px solid #4caf50' },
   executorBox: { backgroundColor: '#f3e5f5', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '16px', borderLeft: '4px solid #9c27b0' },
-  residentApprovedBox: { backgroundColor: '#e8f5e9', padding: '16px', borderRadius: '8px', marginBottom: '16px', borderLeft: '4px solid #4caf50' },
-  residentRejectedBox: { backgroundColor: '#ffebee', padding: '16px', borderRadius: '8px', marginBottom: '16px', borderLeft: '4px solid #e74c3c' },
-  ratingDisplay: { fontSize: '16px', marginTop: '8px', color: '#f57c00', fontWeight: '500' },
-  residentCommentText: { fontSize: '14px', marginTop: '8px', color: '#555', fontStyle: 'italic' },
-  closeButton: { width: '100%', padding: '12px', backgroundColor: '#9c27b0', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px', marginBottom: '12px' },
   manageButton: { padding: '10px 20px', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '14px', fontWeight: '500' },
   modal: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, overflow: 'auto' },
   modalContent: { backgroundColor: 'white', borderRadius: '8px', padding: '32px', maxWidth: '800px', width: '90%', maxHeight: '90vh', overflow: 'auto' },

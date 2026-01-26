@@ -7,6 +7,7 @@ export enum RequestStatus {
   IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   REJECTED = 'rejected',
+  CLOSED = 'closed',
 }
 
 export enum RequestType {
@@ -56,22 +57,22 @@ export class Request {
 
   // Исполнитель
   @Column({ nullable: true })
-  executorId: string; // ID исполнителя из users
+  executorId: string;
 
   @Column({ nullable: true })
-  assignedTo: string; // ФИО исполнителя (для отображения)
+  assignedTo: string;
 
   @Column({ nullable: true })
-  assignedPosition: string; // Должность
+  assignedPosition: string;
 
   @Column({ default: false })
-  executorAccepted: boolean; // Исполнитель принял заявку
+  executorAccepted: boolean;
 
   @Column({ default: false })
-  executorRejected: boolean; // Исполнитель отклонил заявку
+  executorRejected: boolean;
 
   @Column('text', { nullable: true })
-  executorRejectionReason: string; // Причина отказа
+  executorRejectionReason: string;
 
   @Column({ type: 'timestamp', nullable: true })
   deadline: Date;
@@ -81,7 +82,7 @@ export class Request {
   estimatedCost: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  finalCost: number; // Финальная стоимость (может меняться исполнителем)
+  finalCost: number;
 
   @Column({ default: false })
   isFree: boolean;
@@ -89,23 +90,22 @@ export class Request {
   @Column('text', { nullable: true })
   estimateDetails: string;
 
-  // Согласования
+  // Согласования жильца
   @Column({ nullable: true })
-  residentApproval: boolean; // null = не рассмотрено, true = принято, false = отклонено
+  residentApproval: boolean;
 
   @Column('text', { nullable: true })
-  residentRejectionReason: string; // Причина отказа жильца
+  residentRejectionReason: string;
 
-  // Комментарии
+  // Комментарии и оценка
   @Column('text', { nullable: true })
   executorComment: string;
 
   @Column('text', { nullable: true })
   residentComment: string;
 
-  // Рейтинг
   @Column({ type: 'int', nullable: true })
-  executorRating: number; // Оценка исполнителя жильцом (1-5)
+  executorRating: number;
 
   // Фото
   @Column('simple-array', { nullable: true })
@@ -125,4 +125,7 @@ export class Request {
 
   @Column({ type: 'timestamp', nullable: true })
   completedAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  closedAt: Date;
 }

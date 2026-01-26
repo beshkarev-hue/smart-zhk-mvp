@@ -17,6 +17,7 @@ import MetersPage from './pages/resident/MetersPage';
 
 // Manager pages
 import ManagerDashboardPage from './pages/manager/ManagerDashboardPage';
+import ExecutorDashboardPage from './pages/executor/ExecutorDashboardPage';
 import ManagerRequestsPage from './pages/manager/ManagerRequestsPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactElement; allowedRoles?: string[] }> = ({ children, allowedRoles }) => {
@@ -51,6 +52,9 @@ function App() {
         <Route path="/resident/meters" element={<ProtectedRoute allowedRoles={['resident']}><MetersPage /></ProtectedRoute>} />
 
         {/* Manager routes */}
+
+        {/* Executor routes */}
+        <Route path="/executor/dashboard" element={<ProtectedRoute allowedRoles={['executor']}><ExecutorDashboardPage /></ProtectedRoute>} />
         <Route path="/manager/requests" element={<ProtectedRoute allowedRoles={['manager', 'admin']}><ManagerRequestsPage /></ProtectedRoute>} />
         <Route path="/manager/dashboard" element={<ProtectedRoute allowedRoles={['manager', 'admin']}><ManagerDashboardPage /></ProtectedRoute>} />
 

@@ -4,7 +4,8 @@ export declare enum RequestStatus {
     ACCEPTED = "accepted",
     IN_PROGRESS = "in_progress",
     COMPLETED = "completed",
-    REJECTED = "rejected"
+    REJECTED = "rejected",
+    CLOSED = "closed"
 }
 export declare enum RequestType {
     PLUMBING = "plumbing",
@@ -46,4 +47,5 @@ export declare class Request {
     createdAt: Date;
     updatedAt: Date;
     completedAt: Date;
+    closedAt: Date;
 }

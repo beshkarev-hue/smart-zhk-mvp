@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { requestsService, authService, usersService } from '../../services/api';
+import { requestsService, authService } from '../../services/api';
 import { Request } from '../../types';
 
 const RequestsPage: React.FC = () => {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [feedback, setFeedback] = useState('');
   const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState('');
-  const [approve, setApprove] = useState(true);
-  const [rejectionReason, setRejectionReason] = useState('');
 
   const [newRequest, setNewRequest] = useState({
     type: 'plumbing',
@@ -63,50 +61,19 @@ const RequestsPage: React.FC = () => {
     }
   };
 
-  const handleOpenReview = (req: Request) => {
-    setSelectedRequest(req);
-    setRating(req.executorRating || 0);
-    setComment(req.residentComment || '');
-    setApprove(req.residentApproval ?? true);
-    setRejectionReason(req.residentRejectionReason || '');
-    setShowReviewModal(true);
-  };
-
-  const handleSubmitReview = async () => {
+  const handleSubmitFeedback = async () => {
     if (!selectedRequest) return;
 
-    if (!approve && !rejectionReason.trim()) {
-      alert('Укажите причину отказа');
-      return;
-    }
-
-    if (approve && rating === 0) {
-      alert('Поставьте оценку исполнителю');
-      return;
-    }
-
     try {
-      const updateData: any = {
-        residentApproval: approve,
-        residentComment: comment,
-        executorRating: approve ? rating : undefined,
-        residentRejectionReason: !approve ? rejectionReason : undefined,
-      };
-
-      await requestsService.update(selectedRequest.id, updateData);
-
-      // Обновляем рейтинг исполнителя
-      if (approve && rating && selectedRequest.executorId) {
-        await usersService.updateRating(selectedRequest.executorId, rating);
-      }
+      await requestsService.update(selectedRequest.id, {
+        residentComment: feedback,
+      });
 
       alert('✅ Отзыв отправлен!');
-      setShowReviewModal(false);
+      setShowFeedbackModal(false);
       setSelectedRequest(null);
+      setFeedback('');
       setRating(0);
-      setComment('');
-      setApprove(true);
-      setRejectionReason('');
       loadRequests();
     } catch (error) {
       console.error('Ошибка:', error);
@@ -141,11 +108,8 @@ const RequestsPage: React.FC = () => {
   const getStatusBadge = (status: string) => {
     const styles: Record<string, any> = {
       new: { bg: '#e3f2fd', color: '#1976d2', text: 'Новая' },
-      assigned: { bg: '#fff3e0', color: '#f57c00', text: 'Назначена' },
-      accepted: { bg: '#e1f5fe', color: '#0288d1', text: 'Принята исполнителем' },
       in_progress: { bg: '#fff3e0', color: '#f57c00', text: 'В работе' },
-      completed: { bg: '#e8f5e9', color: '#388e3c', text: 'Ожидает приёмки' },
-      closed: { bg: '#f5f5f5', color: '#757575', text: 'Закрыта' },
+      completed: { bg: '#e8f5e9', color: '#388e3c', text: 'Выполнена' },
       rejected: { bg: '#ffebee', color: '#d32f2f', text: 'Отклонена' },
     };
     const s = styles[status] || styles.new;
@@ -201,6 +165,7 @@ const RequestsPage: React.FC = () => {
                       <div>
                         <div style={styles.executorName}>{req.assignedTo}</div>
                         <div style={styles.executorPosition}>{req.assignedPosition}</div>
+                        {req.executorRating && <div style={styles.executorUserRating}>Ваша оценка: {"⭐".repeat(req.executorRating)}</div>}
                       </div>
                     </div>
                     {req.deadline && (
@@ -213,15 +178,11 @@ const RequestsPage: React.FC = () => {
                         })}
                       </div>
                     )}
-                    {req.finalCost !== undefined ? (
+                    {req.estimatedCost !== undefined && (
                       <div style={styles.executorCost}>
-                        💰 Итоговая стоимость: {req.isFree ? 'Бесплатно' : `${req.finalCost.toLocaleString('ru-RU')} ₽`}
+                        💰 Стоимость: {req.isFree ? 'Бесплатно' : `${req.estimatedCost.toLocaleString('ru-RU')} ₽`}
                       </div>
-                    ) : req.estimatedCost !== undefined ? (
-                      <div style={styles.executorCost}>
-                        💰 Плановая стоимость: {req.isFree ? 'Бесплатно' : `${req.estimatedCost.toLocaleString('ru-RU')} ₽`}
-                      </div>
-                    ) : null}
+                    )}
                     {req.estimateDetails && (
                       <div style={styles.executorDetails}>📋 {req.estimateDetails}</div>
                     )}
@@ -240,25 +201,18 @@ const RequestsPage: React.FC = () => {
                   </div>
                 )}
 
-                {req.residentApproval !== null && req.residentApproval !== undefined && (
-                  <div style={req.residentApproval ? styles.approvedBox : styles.rejectedBox}>
-                    <strong>{req.residentApproval ? '✓ Работа принята' : '✗ Работа отклонена'}</strong>
-                    {req.executorRating && req.residentApproval && (
-                      <div style={styles.ratingDisplay}>
-                        Ваша оценка: {'⭐'.repeat(req.executorRating)} ({req.executorRating}/5)
-                      </div>
-                    )}
-                    {req.residentComment && <div style={styles.commentText}>Ваш комментарий: {req.residentComment}</div>}
-                    {req.residentRejectionReason && <div style={styles.commentText}>Причина отказа: {req.residentRejectionReason}</div>}
+                {req.residentComment && (
+                  <div style={styles.feedbackBox}>
+                    <strong>Ваш отзыв:</strong> {req.residentComment}
                   </div>
                 )}
 
-                {req.status === 'completed' && req.residentApproval === null && (
+                {req.status === 'in_progress' && req.assignedTo && !req.residentComment && (
                   <button 
-                    onClick={() => handleOpenReview(req)} 
-                    style={styles.reviewButton}
+                    onClick={() => { setSelectedRequest(req); setShowFeedbackModal(true); }} 
+                    style={styles.feedbackButton}
                   >
-                    ✓ Принять работу / Оставить отзыв
+                    Оставить комментарий / жалобу
                   </button>
                 )}
               </div>
@@ -302,59 +256,35 @@ const RequestsPage: React.FC = () => {
         </div>
       )}
 
-      {showReviewModal && selectedRequest && (
+      {showFeedbackModal && selectedRequest && (
         <div style={styles.modal}>
           <div style={styles.modalContent}>
-            <h3 style={styles.modalTitle}>Приёмка работы</h3>
-            <p style={styles.modalSubtitle}>{selectedRequest.title}</p>
+            <h3 style={styles.modalTitle}>Обратная связь</h3>
+            <p style={styles.modalSubtitle}>Заявка: {selectedRequest.title}</p>
 
-            <div style={styles.approvalToggle}>
-              <button 
-                onClick={() => setApprove(true)} 
-                style={approve ? styles.approveButtonActive : styles.approveButton}
-              >
-                ✓ Принять работу
-              </button>
-              <button 
-                onClick={() => setApprove(false)} 
-                style={!approve ? styles.rejectButtonActive : styles.rejectButton}
-              >
-                ✗ Отклонить работу
-              </button>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Оценка исполнителя</label>
+              <div style={styles.rating}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span 
+                    key={star} 
+                    onClick={() => setRating(star)} 
+                    style={{...styles.star, color: star <= rating ? '#ffc107' : '#ddd'}}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
             </div>
 
-            {approve ? (
-              <>
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>Оценка исполнителя *</label>
-                  <div style={styles.ratingStars}>
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <span 
-                        key={star} 
-                        onClick={() => setRating(star)} 
-                        style={{...styles.star, color: star <= rating ? '#ffc107' : '#ddd'}}
-                      >
-                        ★
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>Комментарий</label>
-                  <textarea value={comment} onChange={(e) => setComment(e.target.value)} style={styles.textarea} rows={3} placeholder="Ваш отзыв о работе..." />
-                </div>
-              </>
-            ) : (
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>Причина отказа *</label>
-                <textarea value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} style={styles.textarea} rows={3} placeholder="Опишите почему работа не принята..." />
-              </div>
-            )}
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Комментарий</label>
+              <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} style={styles.textarea} rows={4} placeholder="Опишите проблему или оставьте отзыв..." />
+            </div>
 
             <div style={styles.modalActions}>
-              <button onClick={() => { setShowReviewModal(false); setRating(0); setComment(''); setApprove(true); setRejectionReason(''); }} style={styles.cancelButton}>Отмена</button>
-              <button onClick={handleSubmitReview} style={styles.saveButton}>Отправить</button>
+              <button onClick={() => { setShowFeedbackModal(false); setFeedback(''); setRating(0); }} style={styles.cancelButton}>Отмена</button>
+              <button onClick={handleSubmitFeedback} style={styles.saveButton}>Отправить</button>
             </div>
           </div>
         </div>
@@ -392,11 +322,8 @@ const styles: Record<string, React.CSSProperties> = {
   executorDetails: { fontSize: '13px', color: '#666', fontStyle: 'italic' },
   responseBox: { backgroundColor: '#e8f5e9', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '12px', borderLeft: '4px solid #4caf50' },
   commentBox: { backgroundColor: '#f3e5f5', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '12px', borderLeft: '4px solid #9c27b0' },
-  approvedBox: { backgroundColor: '#e8f5e9', padding: '16px', borderRadius: '8px', marginBottom: '12px', borderLeft: '4px solid #4caf50' },
-  rejectedBox: { backgroundColor: '#ffebee', padding: '16px', borderRadius: '8px', marginBottom: '12px', borderLeft: '4px solid #e74c3c' },
-  ratingDisplay: { fontSize: '16px', marginTop: '8px', color: '#f57c00' },
-  commentText: { fontSize: '14px', marginTop: '8px', color: '#555', fontStyle: 'italic' },
-  reviewButton: { width: '100%', padding: '14px', backgroundColor: '#2196f3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '15px' },
+  feedbackBox: { backgroundColor: '#fff3e0', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '12px', borderLeft: '4px solid #ff9800' },
+  feedbackButton: { width: '100%', padding: '12px', backgroundColor: '#ff9800', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px' },
   emptyState: { textAlign: 'center', padding: '60px 20px' },
   emptyText: { fontSize: '18px', color: '#999', marginBottom: '20px' },
   emptyButton: { padding: '12px 24px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '16px' },
@@ -404,19 +331,14 @@ const styles: Record<string, React.CSSProperties> = {
   modalContent: { backgroundColor: 'white', borderRadius: '8px', padding: '32px', maxWidth: '600px', width: '90%', maxHeight: '90vh', overflow: 'auto' },
   modalTitle: { fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', marginTop: 0 },
   modalSubtitle: { fontSize: '16px', color: '#666', marginBottom: '24px' },
-  approvalToggle: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' },
-  approveButton: { padding: '12px', backgroundColor: 'white', border: '2px solid #4caf50', color: '#4caf50', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' },
-  approveButtonActive: { padding: '12px', backgroundColor: '#4caf50', border: '2px solid #4caf50', color: 'white', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' },
-  rejectButton: { padding: '12px', backgroundColor: 'white', border: '2px solid #e74c3c', color: '#e74c3c', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' },
-  rejectButtonActive: { padding: '12px', backgroundColor: '#e74c3c', border: '2px solid #e74c3c', color: 'white', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' },
   inputGroup: { marginBottom: '20px' },
   label: { display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px' },
   select: { width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px' },
   input: { width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px' },
   textarea: { width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px', fontFamily: 'inherit', resize: 'vertical' },
-  ratingStars: { display: 'flex', gap: '8px', fontSize: '36px' },
+  rating: { display: 'flex', gap: '8px', fontSize: '32px' },
   star: { cursor: 'pointer', transition: 'color 0.2s' },
-  modalActions: { display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' },
+  modalActions: { display: 'flex', gap: '12px', justifyContent: 'flex-end' },
   cancelButton: { padding: '10px 20px', backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer' },
   saveButton: { padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' },
   loading: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' },

@@ -19,6 +19,7 @@ var RequestStatus;
     RequestStatus["IN_PROGRESS"] = "in_progress";
     RequestStatus["COMPLETED"] = "completed";
     RequestStatus["REJECTED"] = "rejected";
+    RequestStatus["CLOSED"] = "closed";
 })(RequestStatus || (exports.RequestStatus = RequestStatus = {}));
 var RequestType;
 (function (RequestType) {
@@ -163,6 +164,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
     __metadata("design:type", Date)
 ], Request.prototype, "completedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Date)
+], Request.prototype, "closedAt", void 0);
 exports.Request = Request = __decorate([
     (0, typeorm_1.Entity)('requests')
 ], Request);
