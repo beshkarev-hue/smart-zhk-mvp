@@ -18,6 +18,18 @@ const ExecutorDashboardPage: React.FC = () => {
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
+    // Обновляем данные пользователя с сервера
+    if (currentUser?.id) {
+      fetch(`http://localhost:3000/users/profile`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
+      })
+      .then(r => r.json())
+      .then(freshUser => {
+        localStorage.setItem('user', JSON.stringify(freshUser));
+        setUser(freshUser);
+      })
+      .catch(e => console.error(e));
+    }
     setUser(currentUser);
     loadRequests(currentUser?.id);
   }, []);
@@ -25,7 +37,6 @@ const ExecutorDashboardPage: React.FC = () => {
   const loadRequests = async (userId: string) => {
     try {
       const allRequests = await requestsService.getAll();
-      // Фильтруем заявки где executorId === текущий пользователь
       const myRequests = allRequests.filter((r: any) => r.executorId === userId);
       setRequests(myRequests);
     } catch (error) {
@@ -125,6 +136,7 @@ const ExecutorDashboardPage: React.FC = () => {
       accepted: { bg: '#e1f5fe', color: '#0288d1', text: 'Принята' },
       in_progress: { bg: '#fff3e0', color: '#f57c00', text: 'В работе' },
       completed: { bg: '#e8f5e9', color: '#388e3c', text: 'Выполнена' },
+      closed: { bg: '#f5f5f5', color: '#757575', text: 'Закрыта' },
       rejected: { bg: '#ffebee', color: '#d32f2f', text: 'Отклонена' },
     };
     const s = styles[status] || styles.assigned;
@@ -134,14 +146,14 @@ const ExecutorDashboardPage: React.FC = () => {
   const filteredRequests = requests.filter(r => {
     if (filter === 'assigned') return r.status === 'assigned';
     if (filter === 'active') return r.status === 'accepted' || r.status === 'in_progress';
-    if (filter === 'completed') return r.status === 'completed';
+    if (filter === 'completed') return r.status === 'completed' || r.status === 'closed';
     return true;
   });
 
   const stats = {
     assigned: requests.filter(r => r.status === 'assigned').length,
     active: requests.filter(r => r.status === 'accepted' || r.status === 'in_progress').length,
-    completed: requests.filter(r => r.status === 'completed').length,
+    completed: requests.filter(r => r.status === 'completed' || r.status === 'closed').length,
   };
 
   if (loading) return <div style={styles.loading}>Загрузка...</div>;
@@ -221,6 +233,19 @@ const ExecutorDashboardPage: React.FC = () => {
               {req.response && (
                 <div style={styles.commentBox}>
                   <strong>Комментарий УК:</strong> {req.response}
+                </div>
+              )}
+
+              {req.residentApproval !== null && req.residentApproval !== undefined && (
+                <div style={req.residentApproval ? styles.residentApprovedBox : styles.residentRejectedBox}>
+                  <strong>{req.residentApproval ? '✓ Работа принята жильцом' : '✗ Работа отклонена жильцом'}</strong>
+                  {req.executorRating && req.residentApproval && (
+                    <div style={styles.ratingDisplay}>
+                      Оценка: {'⭐'.repeat(req.executorRating)} ({req.executorRating}/5)
+                    </div>
+                  )}
+                  {req.residentComment && <div style={styles.residentCommentText}>Комментарий: {req.residentComment}</div>}
+                  {req.residentRejectionReason && <div style={styles.residentCommentText}>Причина отказа: {req.residentRejectionReason}</div>}
                 </div>
               )}
 
@@ -326,6 +351,10 @@ const styles: Record<string, React.CSSProperties> = {
   costBox: { backgroundColor: '#fff3e0', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '16px', borderLeft: '4px solid #ff9800' },
   costDetails: { marginTop: '8px', fontSize: '13px', color: '#666', fontStyle: 'italic' },
   commentBox: { backgroundColor: '#e8f5e9', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '16px', borderLeft: '4px solid #4caf50' },
+  residentApprovedBox: { backgroundColor: '#e8f5e9', padding: '16px', borderRadius: '8px', marginBottom: '16px', borderLeft: '4px solid #4caf50' },
+  residentRejectedBox: { backgroundColor: '#ffebee', padding: '16px', borderRadius: '8px', marginBottom: '16px', borderLeft: '4px solid #e74c3c' },
+  ratingDisplay: { fontSize: '16px', marginTop: '8px', color: '#f57c00', fontWeight: '500' },
+  residentCommentText: { fontSize: '14px', marginTop: '8px', color: '#555', fontStyle: 'italic' },
   actions: { display: 'flex', gap: '12px', flexWrap: 'wrap' },
   acceptButton: { flex: 1, padding: '12px', backgroundColor: '#27ae60', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px' },
   rejectButton: { flex: 1, padding: '12px', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px' },
