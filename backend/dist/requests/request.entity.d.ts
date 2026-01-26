@@ -5,7 +5,8 @@ export declare enum RequestStatus {
     IN_PROGRESS = "in_progress",
     COMPLETED = "completed",
     REJECTED = "rejected",
-    CLOSED = "closed"
+    CLOSED = "closed",
+    DISPUTED = "disputed"
 }
 export declare enum RequestType {
     PLUMBING = "plumbing",

@@ -20,6 +20,7 @@ var RequestStatus;
     RequestStatus["COMPLETED"] = "completed";
     RequestStatus["REJECTED"] = "rejected";
     RequestStatus["CLOSED"] = "closed";
+    RequestStatus["DISPUTED"] = "disputed";
 })(RequestStatus || (exports.RequestStatus = RequestStatus = {}));
 var RequestType;
 (function (RequestType) {

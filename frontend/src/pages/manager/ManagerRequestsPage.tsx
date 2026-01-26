@@ -61,6 +61,37 @@ const ManagerRequestsPage: React.FC = () => {
     }
   };
 
+  const handleDisputeAction = async (requestId: string, action: 'rework' | 'reassign' | 'dispute') => {
+    try {
+      if (action === 'rework') {
+        if (!window.confirm('Вернуть заявку исполнителю на доработку?')) return;
+        await requestsService.update(requestId, { 
+          status: 'in_progress',
+          residentApproval: undefined,
+          residentComment: undefined,
+          residentRejectionReason: undefined,
+        });
+        alert('✅ Заявка возвращена на доработку');
+      } else if (action === 'reassign') {
+        const req = requests.find(r => r.id === requestId);
+        if (req) {
+          handleOpenManage(req);
+        }
+      } else if (action === 'dispute') {
+        if (!window.confirm('Закрыть заявку как спорную? Это действие нельзя отменить.')) return;
+        await requestsService.update(requestId, { 
+          status: 'disputed',
+          closedAt: new Date().toISOString(),
+        });
+        alert('⚠️ Заявка закрыта как спорная');
+      }
+      loadData();
+    } catch (error) {
+      console.error('Ошибка:', error);
+      alert('❌ Ошибка обработки спорной ситуации');
+    }
+  };
+
   const handleOpenManage = (req: Request) => {
     setSelectedRequest(req);
     setResponse(req.response || '');
@@ -151,6 +182,7 @@ const ManagerRequestsPage: React.FC = () => {
       completed: { bg: '#e8f5e9', color: '#388e3c', text: 'Выполнена' },
       closed: { bg: '#f5f5f5', color: '#757575', text: 'Закрыта' },
       rejected: { bg: '#ffebee', color: '#d32f2f', text: 'Отклонена' },
+      disputed: { bg: '#fff3e0', color: '#ff6f00', text: 'Спорная' },
     };
     const s = styles[status] || styles.new;
     return <span style={{ padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '500', backgroundColor: s.bg, color: s.color }}>{s.text}</span>;
@@ -161,7 +193,7 @@ const ManagerRequestsPage: React.FC = () => {
     if (filter === 'new') return r.status === 'new';
     if (filter === 'assigned') return r.status === 'assigned';
     if (filter === 'in_progress') return r.status === 'accepted' || r.status === 'in_progress';
-    if (filter === 'completed') return r.status === 'completed' || r.status === 'closed';
+    if (filter === 'completed') return r.status === 'completed' || r.status === 'closed' || r.status === 'disputed';
     return true;
   });
 
@@ -170,7 +202,7 @@ const ManagerRequestsPage: React.FC = () => {
     new: requests.filter(r => r.status === 'new').length,
     assigned: requests.filter(r => r.status === 'assigned').length,
     in_progress: requests.filter(r => r.status === 'in_progress' || r.status === 'accepted').length,
-    completed: requests.filter(r => r.status === 'completed' || r.status === 'closed').length,
+    completed: requests.filter(r => r.status === 'completed' || r.status === 'closed' || r.status === 'disputed').length,
   };
 
   if (loading) return <div style={styles.loading}>Загрузка...</div>;
@@ -241,6 +273,32 @@ const ManagerRequestsPage: React.FC = () => {
                 </div>
               </div>
 
+              {req.photosBefore && req.photosBefore.length > 0 && (
+                <div style={styles.photosSection}>
+                  <div style={styles.photosLabel}>📸 Фото проблемы:</div>
+                  <div style={styles.photosGrid}>
+                    {req.photosBefore.map((url: string, idx: number) => (
+                      <a key={idx} href={url} target="_blank" rel="noopener noreferrer" style={styles.photoLink}>
+                        <img src={url} alt={`Проблема ${idx + 1}`} style={styles.photoThumb} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {req.photosAfter && req.photosAfter.length > 0 && (
+                <div style={styles.photosSection}>
+                  <div style={styles.photosLabel}>📸 Фото после работы:</div>
+                  <div style={styles.photosGrid}>
+                    {req.photosAfter.map((url: string, idx: number) => (
+                      <a key={idx} href={url} target="_blank" rel="noopener noreferrer" style={styles.photoLink}>
+                        <img src={url} alt={`После ${idx + 1}`} style={styles.photoThumb} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {req.assignedTo && (
                 <div style={styles.assignedBox}>
                   <strong>👷 Исполнитель:</strong> {req.assignedTo} ({req.assignedPosition})
@@ -279,13 +337,27 @@ const ManagerRequestsPage: React.FC = () => {
                 </div>
               )}
 
+              {req.status === 'completed' && req.residentApproval === false && (
+                <div style={styles.disputeActions}>
+                  <button onClick={() => handleDisputeAction(req.id, 'rework')} style={styles.reworkButton}>
+                    🔄 Вернуть на доработку
+                  </button>
+                  <button onClick={() => handleDisputeAction(req.id, 'reassign')} style={styles.reassignButton}>
+                    👷 Назначить другого
+                  </button>
+                  <button onClick={() => handleDisputeAction(req.id, 'dispute')} style={styles.disputeButton}>
+                    ⚠️ Закрыть как спорную
+                  </button>
+                </div>
+              )}
+
               {req.status === 'completed' && req.residentApproval && (
                 <button onClick={() => handleCloseRequest(req.id)} style={styles.closeButton}>
                   Закрыть заказ-наряд
                 </button>
               )}
 
-              {req.status !== 'closed' && (
+              {req.status !== 'closed' && req.status !== 'disputed' && (
                 <button onClick={() => handleOpenManage(req)} style={styles.manageButton}>
                   Управление заявкой
                 </button>
@@ -389,6 +461,11 @@ const styles: Record<string, React.CSSProperties> = {
   requestMeta: { display: 'flex', gap: '24px', marginBottom: '16px', flexWrap: 'wrap' },
   metaItem: { display: 'flex', gap: '8px', fontSize: '14px' },
   metaLabel: { color: '#666' },
+  photosSection: { marginBottom: '16px' },
+  photosLabel: { fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#666' },
+  photosGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '12px' },
+  photoLink: { display: 'block', borderRadius: '8px', overflow: 'hidden', border: '2px solid #ddd' },
+  photoThumb: { width: '100%', height: '120px', objectFit: 'cover', display: 'block' },
   assignedBox: { backgroundColor: '#e3f2fd', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '12px', borderLeft: '4px solid #2196f3' },
   deadline: { marginTop: '8px', fontSize: '13px', color: '#666' },
   costBox: { backgroundColor: '#fff3e0', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '12px', borderLeft: '4px solid #ff9800' },
@@ -398,6 +475,10 @@ const styles: Record<string, React.CSSProperties> = {
   residentRejectedBox: { backgroundColor: '#ffebee', padding: '16px', borderRadius: '8px', marginBottom: '16px', borderLeft: '4px solid #e74c3c' },
   ratingDisplay: { fontSize: '16px', marginTop: '8px', color: '#f57c00', fontWeight: '500' },
   residentCommentText: { fontSize: '14px', marginTop: '8px', color: '#555', fontStyle: 'italic' },
+  disputeActions: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', marginBottom: '16px' },
+  reworkButton: { padding: '10px 16px', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' },
+  reassignButton: { padding: '10px 16px', backgroundColor: '#9c27b0', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' },
+  disputeButton: { padding: '10px 16px', backgroundColor: '#ff9800', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' },
   closeButton: { width: '100%', padding: '12px', backgroundColor: '#9c27b0', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px', marginBottom: '12px' },
   manageButton: { padding: '10px 20px', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '14px', fontWeight: '500' },
   modal: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, overflow: 'auto' },
@@ -414,11 +495,6 @@ const styles: Record<string, React.CSSProperties> = {
   cancelButton: { padding: '10px 20px', backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer' },
   saveButton: { padding: '10px 20px', backgroundColor: '#27ae60', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' },
   emptyState: { textAlign: 'center', padding: '60px 20px', color: '#999', fontSize: '18px' },
-  photosSection: { marginBottom: '16px' },
-  photosLabel: { fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#666' },
-  photosGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '12px' },
-  photoLink: { display: 'block', borderRadius: '8px', overflow: 'hidden', border: '2px solid #ddd' },
-  photoThumb: { width: '100%', height: '120px', objectFit: 'cover', display: 'block' },
   loading: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' },
 };
 

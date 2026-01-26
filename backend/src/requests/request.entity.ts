@@ -8,6 +8,7 @@ export enum RequestStatus {
   COMPLETED = 'completed',
   REJECTED = 'rejected',
   CLOSED = 'closed',
+  DISPUTED = 'disputed',
 }
 
 export enum RequestType {
