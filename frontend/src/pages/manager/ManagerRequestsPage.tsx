@@ -414,6 +414,11 @@ const styles: Record<string, React.CSSProperties> = {
   cancelButton: { padding: '10px 20px', backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer' },
   saveButton: { padding: '10px 20px', backgroundColor: '#27ae60', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' },
   emptyState: { textAlign: 'center', padding: '60px 20px', color: '#999', fontSize: '18px' },
+  photosSection: { marginBottom: '16px' },
+  photosLabel: { fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#666' },
+  photosGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '12px' },
+  photoLink: { display: 'block', borderRadius: '8px', overflow: 'hidden', border: '2px solid #ddd' },
+  photoThumb: { width: '100%', height: '120px', objectFit: 'cover', display: 'block' },
   loading: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' },
 };
 

@@ -15,9 +15,12 @@ const ExecutorDashboardPage: React.FC = () => {
   const [comment, setComment] = useState('');
   const [finalCost, setFinalCost] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
+  const [photoBeforeUrl, setPhotoBeforeUrl] = useState('');
+  const [photoAfterUrl, setPhotoAfterUrl] = useState('');
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
+    setUser(currentUser);
     // Обновляем данные пользователя с сервера
     if (currentUser?.id) {
       fetch(`http://localhost:3000/users/profile`, {
@@ -30,7 +33,6 @@ const ExecutorDashboardPage: React.FC = () => {
       })
       .catch(e => console.error(e));
     }
-    setUser(currentUser);
     loadRequests(currentUser?.id);
   }, []);
 
@@ -51,6 +53,8 @@ const ExecutorDashboardPage: React.FC = () => {
     setAction(actionType);
     setComment(req.executorComment || '');
     setFinalCost(req.finalCost?.toString() || req.estimatedCost?.toString() || '');
+    setPhotoBeforeUrl('');
+    setPhotoAfterUrl('');
     setShowActionModal(true);
   };
 
@@ -82,6 +86,8 @@ const ExecutorDashboardPage: React.FC = () => {
           executorComment: comment,
           finalCost: finalCost ? parseFloat(finalCost) : undefined,
           completedAt: new Date().toISOString(),
+          photosBefore: photoBeforeUrl ? [photoBeforeUrl] : undefined,
+          photosAfter: photoAfterUrl ? [photoAfterUrl] : undefined,
         };
       }
 
@@ -93,6 +99,8 @@ const ExecutorDashboardPage: React.FC = () => {
       setComment('');
       setFinalCost('');
       setRejectionReason('');
+      setPhotoBeforeUrl('');
+      setPhotoAfterUrl('');
       setAction(null);
       loadRequests(user?.id);
     } catch (error) {
@@ -223,6 +231,32 @@ const ExecutorDashboardPage: React.FC = () => {
                 )}
               </div>
 
+              {req.photosBefore && req.photosBefore.length > 0 && (
+                <div style={styles.photosSection}>
+                  <div style={styles.photosLabel}>📸 Фото проблемы:</div>
+                  <div style={styles.photosGrid}>
+                    {req.photosBefore.map((url: string, idx: number) => (
+                      <a key={idx} href={url} target="_blank" rel="noopener noreferrer" style={styles.photoLink}>
+                        <img src={url} alt={`Проблема ${idx + 1}`} style={styles.photoThumb} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {req.photosAfter && req.photosAfter.length > 0 && (
+                <div style={styles.photosSection}>
+                  <div style={styles.photosLabel}>📸 Фото после работы:</div>
+                  <div style={styles.photosGrid}>
+                    {req.photosAfter.map((url: string, idx: number) => (
+                      <a key={idx} href={url} target="_blank" rel="noopener noreferrer" style={styles.photoLink}>
+                        <img src={url} alt={`После ${idx + 1}`} style={styles.photoThumb} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {req.estimatedCost !== undefined && (
                 <div style={styles.costBox}>
                   💰 Плановая стоимость: {req.isFree ? 'Бесплатно' : `${req.estimatedCost.toLocaleString('ru-RU')} ₽`}
@@ -293,6 +327,16 @@ const ExecutorDashboardPage: React.FC = () => {
                   <input type="number" value={finalCost} onChange={(e) => setFinalCost(e.target.value)} style={styles.input} placeholder="5000" />
                   <small style={styles.hint}>Можно изменить если стоимость отличается от плановой</small>
                 </div>
+
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Фото ДО работы (опционально)</label>
+                  <input type="text" value={photoBeforeUrl} onChange={(e) => setPhotoBeforeUrl(e.target.value)} style={styles.input} placeholder="https://i.imgur.com/before.jpg" />
+                </div>
+
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Фото ПОСЛЕ работы (опционально)</label>
+                  <input type="text" value={photoAfterUrl} onChange={(e) => setPhotoAfterUrl(e.target.value)} style={styles.input} placeholder="https://i.imgur.com/after.jpg" />
+                </div>
               </>
             )}
 
@@ -304,7 +348,7 @@ const ExecutorDashboardPage: React.FC = () => {
             )}
 
             <div style={styles.modalActions}>
-              <button onClick={() => { setShowActionModal(false); setComment(''); setFinalCost(''); setRejectionReason(''); }} style={styles.cancelButton}>Отмена</button>
+              <button onClick={() => { setShowActionModal(false); setComment(''); setFinalCost(''); setRejectionReason(''); setPhotoBeforeUrl(''); setPhotoAfterUrl(''); }} style={styles.cancelButton}>Отмена</button>
               <button onClick={handleSubmitAction} style={action === 'reject' ? styles.rejectButtonModal : styles.saveButton}>
                 {action === 'accept' && 'Принять'}
                 {action === 'reject' && 'Отклонить'}
@@ -348,6 +392,11 @@ const styles: Record<string, React.CSSProperties> = {
   requestMeta: { display: 'flex', gap: '24px', marginBottom: '16px', flexWrap: 'wrap' },
   metaItem: { display: 'flex', gap: '8px', fontSize: '14px' },
   metaLabel: { color: '#666', fontWeight: '500' },
+  photosSection: { marginBottom: '16px' },
+  photosLabel: { fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#666' },
+  photosGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '12px' },
+  photoLink: { display: 'block', borderRadius: '8px', overflow: 'hidden', border: '2px solid #ddd' },
+  photoThumb: { width: '100%', height: '120px', objectFit: 'cover', display: 'block' },
   costBox: { backgroundColor: '#fff3e0', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '16px', borderLeft: '4px solid #ff9800' },
   costDetails: { marginTop: '8px', fontSize: '13px', color: '#666', fontStyle: 'italic' },
   commentBox: { backgroundColor: '#e8f5e9', padding: '12px', borderRadius: '4px', fontSize: '14px', marginBottom: '16px', borderLeft: '4px solid #4caf50' },

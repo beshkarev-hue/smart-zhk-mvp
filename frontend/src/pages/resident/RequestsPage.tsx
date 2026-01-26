@@ -18,6 +18,7 @@ const RequestsPage: React.FC = () => {
     type: 'plumbing',
     title: '',
     description: '',
+    photoUrls: [] as string[],
   });
 
   useEffect(() => {
@@ -54,7 +55,7 @@ const RequestsPage: React.FC = () => {
       });
 
       setShowCreateModal(false);
-      setNewRequest({ type: 'plumbing', title: '', description: '' });
+      setNewRequest({ type: 'plumbing', title: '', description: '', photoUrls: [] });
       loadRequests();
       alert('✅ Заявка создана!');
     } catch (error) {
@@ -187,6 +188,19 @@ const RequestsPage: React.FC = () => {
                 <h3 style={styles.requestTitle}>{req.title}</h3>
                 <p style={styles.requestDesc}>{req.description}</p>
 
+                {req.photosBefore && req.photosBefore.length > 0 && (
+                  <div style={styles.photosSection}>
+                    <div style={styles.photosLabel}>Фото проблемы:</div>
+                    <div style={styles.photosGrid}>
+                      {req.photosBefore.map((url: string, idx: number) => (
+                        <a key={idx} href={url} target="_blank" rel="noopener noreferrer" style={styles.photoLink}>
+                          <img src={url} alt={`Фото ${idx + 1}`} style={styles.photoThumb} />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div style={styles.requestMeta}>
                   <div style={styles.metaItem}>
                     <span style={styles.metaLabel}>📅 Создана:</span>
@@ -292,6 +306,17 @@ const RequestsPage: React.FC = () => {
             <div style={styles.inputGroup}>
               <label style={styles.label}>Описание</label>
               <textarea value={newRequest.description} onChange={(e) => setNewRequest({...newRequest, description: e.target.value})} style={styles.textarea} rows={4} placeholder="Подробное описание..." />
+
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Фото проблемы (опционально)</label>
+              <input 
+                value={newRequest.photoUrls[0] || ''} 
+                onChange={(e) => setNewRequest({...newRequest, photoUrls: [e.target.value]})} 
+                style={styles.input} 
+                placeholder="URL фото (например, https://i.imgur.com/abc.jpg)" 
+              />
+              <small style={styles.hint}>Можно загрузить фото на imgur.com и вставить ссылку</small>
+            </div>
             </div>
 
             <div style={styles.modalActions}>
@@ -419,6 +444,12 @@ const styles: Record<string, React.CSSProperties> = {
   modalActions: { display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' },
   cancelButton: { padding: '10px 20px', backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer' },
   saveButton: { padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' },
+  hint: { display: 'block', marginTop: '4px', fontSize: '12px', color: '#999' },
+  photosSection: { marginBottom: '16px' },
+  photosLabel: { fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#666' },
+  photosGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '12px' },
+  photoLink: { display: 'block', borderRadius: '8px', overflow: 'hidden', border: '2px solid #ddd' },
+  photoThumb: { width: '100%', height: '120px', objectFit: 'cover', display: 'block' },
   loading: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' },
 };
 
