@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface LogoProps {
-  size?: 'small' | 'medium' | 'large';
+  size?: 'small' | 'medium' | 'large' | 'xlarge';
   showText?: boolean;
 }
 
@@ -10,6 +10,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'medium', showText = true }) => {
     small: { height: 50, fontSize: 18 },
     medium: { height: 80, fontSize: 24 },
     large: { height: 120, fontSize: 32 },
+    xlarge: { height: 160, fontSize: 40 },
   };
 
   const currentSize = sizes[size];

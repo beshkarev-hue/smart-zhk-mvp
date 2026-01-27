@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../../services/api';
+import Logo from '../../components/Logo';
+import { colors } from '../../theme/colors';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,7 +19,6 @@ const LoginPage: React.FC = () => {
     try {
       const response = await authService.login({ email, password });
       
-      // Редирект в зависимости от роли
       if (response.user.role === 'resident') {
         navigate('/resident/dashboard');
       } else if (response.user.role === 'manager') {
@@ -37,8 +38,10 @@ const LoginPage: React.FC = () => {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h1 style={styles.title}>Вход в систему</h1>
-        <p style={styles.subtitle}>Умная ЖКХ платформа</p>
+        <div style={styles.logoSection}>
+          <Logo size="xlarge" showText={false} />
+          <p style={styles.subtitle}>Умная платформа управления ЖКХ</p>
+        </div>
 
         {error && (
           <div style={styles.error}>
@@ -56,6 +59,7 @@ const LoginPage: React.FC = () => {
               style={styles.input}
               required
               disabled={loading}
+              placeholder="your@email.com"
             />
           </div>
 
@@ -68,6 +72,7 @@ const LoginPage: React.FC = () => {
               style={styles.input}
               required
               disabled={loading}
+              placeholder="••••••••"
             />
           </div>
 
@@ -90,38 +95,46 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'rgba(124, 179, 66, 0.15)',
+    backgroundImage: 'linear-gradient(135deg, rgba(124, 179, 66, 0.1) 0%, rgba(30, 136, 229, 0.1) 100%)',
   },
   card: {
     backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '40px',
+    borderRadius: '16px',
+    padding: '48px',
     width: '100%',
-    maxWidth: '400px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+    maxWidth: '440px',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+    border: `2px solid ${colors.primary}`,
   },
-  title: {
-    fontSize: '28px',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: '8px',
-    marginTop: 0,
-  },
-  subtitle: {
-    fontSize: '16px',
-    color: '#666',
+  logoSection: {
     textAlign: 'center',
     marginBottom: '32px',
-    marginTop: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '12px',
+  },
+  title: {
+    fontSize: '32px',
+    fontWeight: 'bold',
+    color: colors.primary,
+    margin: 0,
+  },
+  subtitle: {
+    fontSize: '14px',
+    color: colors.textLight,
+    margin: 0,
   },
   error: {
     backgroundColor: '#ffebee',
     color: '#c62828',
     padding: '12px',
-    borderRadius: '4px',
+    borderRadius: '8px',
     marginBottom: '20px',
     fontSize: '14px',
     textAlign: 'center',
+    border: '1px solid #ef9a9a',
   },
   form: {
     display: 'flex',
@@ -133,39 +146,43 @@ const styles: Record<string, React.CSSProperties> = {
   label: {
     display: 'block',
     fontSize: '14px',
-    fontWeight: '500',
+    fontWeight: '600',
     marginBottom: '8px',
-    color: '#333',
+    color: colors.text,
   },
   input: {
     width: '100%',
-    padding: '12px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
+    padding: '12px 16px',
+    border: `2px solid ${colors.light}`,
+    borderRadius: '8px',
     fontSize: '14px',
     boxSizing: 'border-box',
+    transition: 'border-color 0.2s',
+    outline: 'none',
   },
   button: {
     width: '100%',
     padding: '14px',
-    backgroundColor: '#007bff',
+    backgroundColor: colors.secondary,
     color: 'white',
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: '8px',
     fontSize: '16px',
-    fontWeight: '500',
+    fontWeight: '600',
     cursor: 'pointer',
     marginTop: '8px',
+    transition: 'all 0.2s',
   },
   footer: {
     textAlign: 'center',
     marginTop: '24px',
     fontSize: '14px',
-    color: '#666',
+    color: colors.textLight,
   },
   link: {
-    color: '#007bff',
+    color: colors.secondary,
     textDecoration: 'none',
+    fontWeight: '600',
   },
 };
 
