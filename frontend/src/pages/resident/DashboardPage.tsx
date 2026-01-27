@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService, requestsService } from '../../services/api';
+import Logo from '../../components/Logo';
+import { colors } from '../../theme/colors';
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -21,7 +23,6 @@ const DashboardPage: React.FC = () => {
       const requests = await requestsService.getByUser(authService.getCurrentUser()?.id || '');
       const active = requests.filter((r: any) => r.status === 'new' || r.status === 'assigned' || r.status === 'accepted' || r.status === 'in_progress').length;
       
-      // Проверяем есть ли непросмотренные обновления
       const lastVisit = localStorage.getItem('resident_last_visit') || '0';
       const hasNew = requests.some((r: any) => 
         (r.response || r.assignedTo || r.executorComment || r.status === 'completed') &&
@@ -38,7 +39,6 @@ const DashboardPage: React.FC = () => {
   };
 
   const handleNavigateToRequests = () => {
-    // Сохраняем время посещения
     localStorage.setItem('resident_last_visit', Date.now().toString());
     navigate('/resident/requests');
   };
@@ -52,7 +52,7 @@ const DashboardPage: React.FC = () => {
     <div style={styles.container}>
       <header style={styles.header}>
         <div style={styles.headerContent}>
-          <h1 style={styles.logo}>Отта</h1>
+          <Logo size="large" showText={false} />
           <div style={styles.headerRight}>
             <span style={styles.userName}>{user?.firstName || 'Пользователь'}</span>
             <button onClick={handleLogout} style={styles.logoutButton}>Выход</button>
@@ -135,31 +135,41 @@ const DashboardPage: React.FC = () => {
 };
 
 const styles: Record<string, React.CSSProperties> = {
-  container: { minHeight: '100vh', backgroundColor: '#f5f5f5' },
-  header: { backgroundColor: 'white', borderBottom: '1px solid #ddd', padding: '16px 0' },
+  container: { minHeight: '100vh', backgroundColor: 'rgba(124, 179, 66, 0.08)' },
+  header: { backgroundColor: 'rgba(124, 179, 66, 0.2)', borderBottom: `2px solid ${colors.primary}`, padding: '12px 0', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
   headerContent: { maxWidth: '1200px', margin: '0 auto', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  logo: { fontSize: '24px', fontWeight: 'bold', color: '#007bff', margin: 0 },
   headerRight: { display: 'flex', alignItems: 'center', gap: '16px' },
-  userName: { fontSize: '16px', color: '#333' },
-  logoutButton: { padding: '8px 16px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' },
+  userName: { fontSize: '16px', color: '#000', fontWeight: '600' },
+  logoutButton: { padding: '8px 16px', backgroundColor: colors.error, color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' },
   main: { maxWidth: '1200px', margin: '0 auto', padding: '32px 20px' },
   welcomeSection: { marginBottom: '32px' },
-  welcomeTitle: { fontSize: '28px', fontWeight: 'bold', marginBottom: '8px', marginTop: 0 },
-  welcomeAddress: { fontSize: '16px', color: '#666', margin: 0 },
+  welcomeTitle: { fontSize: '28px', fontWeight: 'bold', marginBottom: '8px', marginTop: 0, color: colors.text },
+  welcomeAddress: { fontSize: '16px', color: colors.textLight, margin: 0 },
   statsSection: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '40px' },
-  statCard: { backgroundColor: 'white', borderRadius: '8px', padding: '24px', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
+  statCard: { backgroundColor: 'white', borderRadius: '12px', padding: '24px', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', border: `2px solid ${colors.light}` },
   statIcon: { fontSize: '36px' },
   statContent: { flex: 1 },
-  statValue: { fontSize: '32px', fontWeight: 'bold', color: '#007bff', marginBottom: '4px' },
-  statLabel: { fontSize: '14px', color: '#666' },
+  statValue: { fontSize: '32px', fontWeight: 'bold', color: colors.primary, marginBottom: '4px' },
+  statLabel: { fontSize: '14px', color: colors.textLight },
   quickActionsSection: { marginBottom: '40px' },
-  sectionTitle: { fontSize: '20px', fontWeight: 'bold', marginBottom: '20px', marginTop: 0 },
+  sectionTitle: { fontSize: '20px', fontWeight: 'bold', marginBottom: '20px', marginTop: 0, color: colors.text },
   quickActionsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '16px' },
-  quickActionCard: { position: 'relative', backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '8px', padding: '24px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s' },
+  quickActionCard: { 
+    position: 'relative', 
+    backgroundColor: 'rgba(30, 136, 229, 0.85)', 
+    border: 'none', 
+    borderRadius: '12px', 
+    padding: '24px', 
+    textAlign: 'center', 
+    cursor: 'pointer', 
+    transition: 'all 0.2s', 
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    color: 'white'
+  },
   quickActionIcon: { fontSize: '48px', marginBottom: '12px' },
-  quickActionTitle: { fontSize: '14px', fontWeight: '500', color: '#333' },
-  badge: { position: 'absolute', top: '10px', right: '10px', backgroundColor: '#007bff', color: 'white', borderRadius: '12px', padding: '4px 8px', fontSize: '12px', fontWeight: 'bold' },
-  updateBadge: { position: 'absolute', top: '10px', right: '10px', backgroundColor: '#e74c3c', borderRadius: '50%', width: '12px', height: '12px' },
+  quickActionTitle: { fontSize: '14px', fontWeight: '600', color: 'white' },
+  badge: { position: 'absolute', top: '10px', right: '10px', backgroundColor: colors.accent, color: 'white', borderRadius: '12px', padding: '4px 8px', fontSize: '12px', fontWeight: 'bold' },
+  updateBadge: { position: 'absolute', top: '10px', right: '10px', backgroundColor: colors.error, borderRadius: '50%', width: '12px', height: '12px' },
 };
 
 export default DashboardPage;

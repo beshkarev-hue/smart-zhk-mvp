@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import Logo from '../../components/Logo';
+import { colors } from '../../theme/colors';
 import { useNavigate } from 'react-router-dom';
 import { authService, requestsService } from '../../services/api';
 import { Request } from '../../types';
@@ -170,7 +172,7 @@ const ExecutorDashboardPage: React.FC = () => {
     <div style={styles.container}>
       <header style={styles.header}>
         <div style={styles.headerContent}>
-          <h1 style={styles.logo}>Отта - Исполнитель</h1>
+          <Logo size="medium" showText={false} />
           <div style={styles.headerRight}>
             <div style={styles.userInfo}>
               <div style={styles.userName}>{user?.firstName} {user?.lastName}</div>
@@ -363,31 +365,31 @@ const ExecutorDashboardPage: React.FC = () => {
 };
 
 const styles: Record<string, React.CSSProperties> = {
-  container: { minHeight: '100vh', backgroundColor: '#f5f5f5' },
-  header: { backgroundColor: '#2c3e50', borderBottom: '1px solid #34495e', padding: '16px 0' },
+  container: { minHeight: '100vh', backgroundColor: 'rgba(124, 179, 66, 0.08)' },
+  header: { backgroundColor: 'rgba(124, 179, 66, 0.15)', borderBottom: `2px solid ${colors.primary}`, boxShadow: '0 2px 4px rgba(0,0,0,0.1)', padding: '12px 0' },
   headerContent: { maxWidth: '1400px', margin: '0 auto', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  logo: { fontSize: '24px', fontWeight: 'bold', color: 'white', margin: 0 },
+  logo: { fontSize: '24px', fontWeight: '600', color: '#000', margin: 0 },
   headerRight: { display: 'flex', alignItems: 'center', gap: '20px' },
   userInfo: { textAlign: 'right' },
-  userName: { fontSize: '16px', color: 'white', fontWeight: 'bold' },
+  userName: { fontSize: '16px', color: '#000', fontWeight: '600' },
   userPosition: { fontSize: '13px', color: '#95a5a6' },
   userRating: { fontSize: '14px', color: '#f39c12', marginTop: '4px' },
-  logoutButton: { padding: '8px 16px', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' },
+  logoutButton: { padding: '8px 16px', backgroundColor: '#e74c3c', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer' },
   main: { maxWidth: '1400px', margin: '0 auto', padding: '32px 20px' },
   statsSection: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '32px' },
   statCard: { backgroundColor: 'white', padding: '24px', borderRadius: '8px', textAlign: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
-  statValue: { fontSize: '36px', fontWeight: 'bold', color: '#2c3e50', marginBottom: '8px' },
+  statValue: { fontSize: '36px', fontWeight: '600', color: '#2c3e50', marginBottom: '8px' },
   statLabel: { fontSize: '14px', color: '#666' },
   filtersSection: { display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' },
   filter: { padding: '8px 16px', backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '20px', cursor: 'pointer', fontSize: '14px' },
-  filterActive: { padding: '8px 16px', backgroundColor: '#3498db', color: 'white', border: '1px solid #3498db', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '500' },
+  filterActive: { padding: '8px 16px', backgroundColor: '#3498db', color: '#000', border: '1px solid #3498db', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '500' },
   requestsList: { display: 'flex', flexDirection: 'column', gap: '16px' },
   requestCard: { backgroundColor: 'white', borderRadius: '8px', padding: '24px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
   requestHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' },
   requestType: { display: 'flex', alignItems: 'center', gap: '8px' },
   typeIcon: { fontSize: '24px' },
   typeName: { fontSize: '14px', color: '#666', fontWeight: '500' },
-  requestTitle: { fontSize: '20px', fontWeight: 'bold', marginBottom: '12px', marginTop: 0 },
+  requestTitle: { fontSize: '20px', fontWeight: '600', marginBottom: '12px', marginTop: 0 },
   requestDesc: { fontSize: '15px', color: '#555', marginBottom: '16px', lineHeight: '1.6' },
   requestMeta: { display: 'flex', gap: '24px', marginBottom: '16px', flexWrap: 'wrap' },
   metaItem: { display: 'flex', gap: '8px', fontSize: '14px' },
@@ -405,13 +407,13 @@ const styles: Record<string, React.CSSProperties> = {
   ratingDisplay: { fontSize: '16px', marginTop: '8px', color: '#f57c00', fontWeight: '500' },
   residentCommentText: { fontSize: '14px', marginTop: '8px', color: '#555', fontStyle: 'italic' },
   actions: { display: 'flex', gap: '12px', flexWrap: 'wrap' },
-  acceptButton: { flex: 1, padding: '12px', backgroundColor: '#27ae60', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px' },
-  rejectButton: { flex: 1, padding: '12px', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px' },
-  completeButton: { width: '100%', padding: '12px', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px' },
+  acceptButton: { flex: 1, padding: '12px', backgroundColor: '#27ae60', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px' },
+  rejectButton: { flex: 1, padding: '12px', backgroundColor: '#e74c3c', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px' },
+  completeButton: { width: '100%', padding: '12px', backgroundColor: '#3498db', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px' },
   emptyState: { textAlign: 'center', padding: '60px 20px', color: '#999', fontSize: '18px' },
   modal: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
   modalContent: { backgroundColor: 'white', borderRadius: '8px', padding: '32px', maxWidth: '600px', width: '90%', maxHeight: '90vh', overflow: 'auto' },
-  modalTitle: { fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', marginTop: 0 },
+  modalTitle: { fontSize: '24px', fontWeight: '600', marginBottom: '8px', marginTop: 0 },
   modalSubtitle: { fontSize: '16px', color: '#666', marginBottom: '24px' },
   inputGroup: { marginBottom: '20px' },
   label: { display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px' },
@@ -420,8 +422,8 @@ const styles: Record<string, React.CSSProperties> = {
   hint: { display: 'block', marginTop: '4px', fontSize: '12px', color: '#999' },
   modalActions: { display: 'flex', gap: '12px', justifyContent: 'flex-end' },
   cancelButton: { padding: '10px 20px', backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer' },
-  saveButton: { padding: '10px 20px', backgroundColor: '#27ae60', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' },
-  rejectButtonModal: { padding: '10px 20px', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' },
+  saveButton: { padding: '10px 20px', backgroundColor: '#27ae60', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' },
+  rejectButtonModal: { padding: '10px 20px', backgroundColor: '#e74c3c', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' },
   loading: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' },
 };
 
