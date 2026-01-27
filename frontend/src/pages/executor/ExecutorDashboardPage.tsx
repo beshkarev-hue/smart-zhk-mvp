@@ -172,7 +172,7 @@ const ExecutorDashboardPage: React.FC = () => {
     <div style={styles.container}>
       <header style={styles.header}>
         <div style={styles.headerContent}>
-          <Logo size="medium" showText={false} />
+          <Logo size="large" showText={false} />
           <div style={styles.headerRight}>
             <div style={styles.userInfo}>
               <div style={styles.userName}>{user?.firstName} {user?.lastName}</div>
