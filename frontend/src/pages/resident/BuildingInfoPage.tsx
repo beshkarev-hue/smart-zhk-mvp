@@ -20,16 +20,11 @@ const BuildingInfoPage: React.FC = () => {
         const buildingData = await buildingsService.getByAddress(user.buildingAddress);
         setBuilding(buildingData);
       }
-      const metersData = await metersService.getMyMeters();
-      setMeters(metersData);
     } catch (error) {
       console.error('Ошибка загрузки:', error);
     } finally {
       setLoading(false);
     }
-  };
-
-    return names[type] || type;
   };
 
   if (loading) return <div style={styles.loading}>Загрузка...</div>;
@@ -186,7 +181,6 @@ const BuildingInfoPage: React.FC = () => {
             </div>
           </section>
         )}
-
       </main>
     </div>
   );
@@ -219,15 +213,6 @@ const styles: Record<string, React.CSSProperties> = {
   contactIcon: { fontSize: '32px' },
   contactLabel: { fontSize: '14px', color: colors.textLight, marginBottom: '4px' },
   contactValue: { fontSize: '16px', fontWeight: '600', color: colors.text },
-  metersGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' },
-  meterCard: { backgroundColor: colors.light, borderRadius: '12px', padding: '24px' },
-  meterHeader: { marginBottom: '16px' },
-  meterType: { fontSize: '18px', fontWeight: 'bold', color: colors.primary },
-  meterInfo: { display: 'flex', flexDirection: 'column', gap: '12px' },
-  meterItem: { display: 'flex', justifyContent: 'space-between' },
-  meterLabel: { fontSize: '14px', color: colors.textLight },
-  meterValue: { fontSize: '14px', fontWeight: '600', color: colors.text },
-  emptyState: { textAlign: 'center', padding: '60px 20px', color: colors.textLight, fontSize: '18px' },
   loading: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' },
 };
 
