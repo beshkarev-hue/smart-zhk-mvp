@@ -374,7 +374,7 @@ const styles: Record<string, React.CSSProperties> = {
   userName: { fontSize: '16px', color: '#000', fontWeight: '600' },
   userPosition: { fontSize: '13px', color: '#95a5a6' },
   userRating: { fontSize: '14px', color: '#f39c12', marginTop: '4px' },
-  logoutButton: { padding: '8px 16px', backgroundColor: '#e74c3c', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer' },
+  logoutButton: { padding: '8px 16px', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' },
   main: { maxWidth: '1400px', margin: '0 auto', padding: '32px 20px' },
   statsSection: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '32px' },
   statCard: { backgroundColor: 'white', padding: '24px', borderRadius: '8px', textAlign: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
