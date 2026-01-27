@@ -8,13 +8,13 @@ import RegisterPage from './pages/auth/RegisterPage';
 
 // Resident pages
 import DashboardPage from './pages/resident/DashboardPage';
+import BuildingInfoPage from './pages/resident/BuildingInfoPage';
+import MetersPage from './pages/resident/MetersPage';
 import PaymentsPage from './pages/resident/PaymentsPage';
 import RequestsPage from './pages/resident/RequestsPage';
 import CreateRequestPage from './pages/resident/CreateRequestPage';
 import NewsPage from './pages/resident/NewsPage';
 import ProfilePage from './pages/resident/ProfilePage';
-import MetersPage from './pages/resident/MetersPage';
-
 // Manager pages
 import ManagerDashboardPage from './pages/manager/ManagerDashboardPage';
 import ExecutorDashboardPage from './pages/executor/ExecutorDashboardPage';
@@ -44,6 +44,8 @@ function App() {
 
         {/* Resident routes */}
         <Route path="/resident/dashboard" element={<ProtectedRoute allowedRoles={['resident']}><DashboardPage /></ProtectedRoute>} />
+            <Route path="/resident/building" element={<ProtectedRoute allowedRoles={['resident']}><BuildingInfoPage /></ProtectedRoute>} />
+            <Route path="/resident/meters" element={<ProtectedRoute allowedRoles={['resident']}><MetersPage /></ProtectedRoute>} />
         <Route path="/resident/payments" element={<ProtectedRoute allowedRoles={['resident']}><PaymentsPage /></ProtectedRoute>} />
         <Route path="/resident/requests" element={<ProtectedRoute allowedRoles={['resident']}><RequestsPage /></ProtectedRoute>} />
         <Route path="/resident/requests/new" element={<ProtectedRoute allowedRoles={['resident']}><CreateRequestPage /></ProtectedRoute>} />

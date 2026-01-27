@@ -6,3 +6,6 @@ export { default as apiClient } from './axios';
 export { gisZhkhService } from './gisZhkhService';
 
 export { usersService } from './usersService';
+
+export * from './buildingsService';
+export * from './metersService';

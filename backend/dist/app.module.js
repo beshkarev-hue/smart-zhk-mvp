@@ -14,6 +14,8 @@ const auth_module_1 = require("./auth/auth.module");
 const users_module_1 = require("./users/users.module");
 const payments_module_1 = require("./payments/payments.module");
 const requests_module_1 = require("./requests/requests.module");
+const buildings_module_1 = require("./buildings/buildings.module");
+const meters_module_1 = require("./meters/meters.module");
 const news_module_1 = require("./news/news.module");
 const gis_zhkh_module_1 = require("./gis-zhkh/gis-zhkh.module");
 let AppModule = class AppModule {
@@ -40,6 +42,8 @@ exports.AppModule = AppModule = __decorate([
             users_module_1.UsersModule,
             payments_module_1.PaymentsModule,
             requests_module_1.RequestsModule,
+            buildings_module_1.BuildingsModule,
+            meters_module_1.MetersModule,
             news_module_1.NewsModule,
             gis_zhkh_module_1.GisZhkhModule,
         ],

@@ -123,6 +123,11 @@ const DashboardPage: React.FC = () => {
               <div style={styles.quickActionTitle}>Новости</div>
             </button>
 
+            <button onClick={() => navigate('/resident/building')} style={styles.quickActionCard}>
+              <div style={styles.quickActionIcon}>🏢</div>
+              <div style={styles.quickActionTitle}>О доме</div>
+            </button>
+
             <button onClick={() => navigate('/resident/profile')} style={styles.quickActionCard}>
               <div style={styles.quickActionIcon}>👤</div>
               <div style={styles.quickActionTitle}>Профиль</div>

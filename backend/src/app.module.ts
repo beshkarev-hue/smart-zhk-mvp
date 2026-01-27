@@ -5,6 +5,8 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PaymentsModule } from './payments/payments.module';
 import { RequestsModule } from './requests/requests.module';
+import { BuildingsModule } from './buildings/buildings.module';
+import { MetersModule } from './meters/meters.module';
 import { NewsModule } from './news/news.module';
 import { GisZhkhModule } from './gis-zhkh/gis-zhkh.module';
 
@@ -33,6 +35,8 @@ import { GisZhkhModule } from './gis-zhkh/gis-zhkh.module';
     UsersModule,
     PaymentsModule,
     RequestsModule,
+    BuildingsModule,
+    MetersModule,
     NewsModule,
     GisZhkhModule,
   ],
