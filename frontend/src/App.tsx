@@ -47,7 +47,7 @@ function App() {
 
         {/* Resident routes */}
         <Route path="/resident/dashboard" element={<ProtectedRoute allowedRoles={['resident']}><DashboardPage /></ProtectedRoute>} />
-            <Route path="/resident/building" element={<ProtectedRoute allowedRoles={['resident']}><BuildingInfoPage /></ProtectedRoute>} />
+            <Route path="/resident/building-info" element={<ProtectedRoute allowedRoles={['resident']}><BuildingInfoPage /></ProtectedRoute>} />
             <Route path="/resident/meters" element={<ProtectedRoute allowedRoles={['resident']}><MetersPage /></ProtectedRoute>} />
         <Route path="/resident/payments" element={<ProtectedRoute allowedRoles={['resident']}><PaymentsPage /></ProtectedRoute>} />
         <Route path="/resident/requests" element={<ProtectedRoute allowedRoles={['resident']}><RequestsPage /></ProtectedRoute>} />
