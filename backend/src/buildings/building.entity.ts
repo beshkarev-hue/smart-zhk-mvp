@@ -15,25 +15,21 @@ export class Building {
   yearBuilt: number;
 
   @Column({ nullable: true })
-  accountNumber: string;
 
   @Column({ nullable: true })
   floors: number;
 
   @Column({ nullable: true })
-  accountNumber: string;
 
   @Column({ nullable: true })
   entrances: number;
 
   @Column({ nullable: true })
-  accountNumber: string;
 
   @Column({ nullable: true })
   totalApartments: number;
 
   @Column({ nullable: true })
-  accountNumber: string;
 
   @Column({ nullable: true })
   wallMaterial: string;

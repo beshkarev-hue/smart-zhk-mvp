@@ -27,8 +27,34 @@ let NewsService = class NewsService {
     }
     async findAll() {
         return this.newsRepository.find({
-            order: { createdAt: 'DESC' },
+            order: {
+                isPinned: 'DESC',
+                createdAt: 'DESC'
+            },
         });
+    }
+    async findPublished() {
+        const now = new Date();
+        return this.newsRepository
+            .createQueryBuilder('news')
+            .where('news.isPublished = :published', { published: true })
+            .andWhere('news.publishedAt <= :now', { now })
+            .andWhere('(news.expiresAt IS NULL OR news.expiresAt >= :now)', { now })
+            .orderBy('news.isPinned', 'DESC')
+            .addOrderBy('news.publishedAt', 'DESC')
+            .getMany();
+    }
+    async findByCategory(category) {
+        const now = new Date();
+        return this.newsRepository
+            .createQueryBuilder('news')
+            .where('news.category = :category', { category })
+            .andWhere('news.isPublished = :published', { published: true })
+            .andWhere('news.publishedAt <= :now', { now })
+            .andWhere('(news.expiresAt IS NULL OR news.expiresAt >= :now)', { now })
+            .orderBy('news.isPinned', 'DESC')
+            .addOrderBy('news.publishedAt', 'DESC')
+            .getMany();
     }
     async findOne(id) {
         return this.newsRepository.findOne({ where: { id } });
@@ -41,7 +67,11 @@ let NewsService = class NewsService {
         await this.newsRepository.delete(id);
     }
     async publish(id) {
-        await this.newsRepository.update(id, { isPublished: true });
+        const now = new Date();
+        await this.newsRepository.update(id, {
+            isPublished: true,
+            publishedAt: now
+        });
         return this.findOne(id);
     }
     async unpublish(id) {

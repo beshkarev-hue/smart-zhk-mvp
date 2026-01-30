@@ -1,38 +1,33 @@
-import apiClient from './axios';
-import { News } from '../../types';
+import api from './axios';
 
-export const newsService = {
-  async getAll(): Promise<News[]> {
-    const response = await apiClient.get<News[]>('/news');
+export interface News {
+  id: string;
+  category: 'normal' | 'planned' | 'urgent';
+  title: string;
+  content: string;
+  imageUrl?: string;
+  isPublished: boolean;
+  publishedAt: string;
+  expiresAt?: string;
+  isPinned: boolean;
+  createdAt: string;
+}
+
+const newsService = {
+  async getPublished(): Promise<News[]> {
+    const response = await api.get('/news/published');
+    return response.data;
+  },
+
+  async getByCategory(category: string): Promise<News[]> {
+    const response = await api.get(`/news/category/${category}`);
     return response.data;
   },
 
   async getById(id: string): Promise<News> {
-    const response = await apiClient.get<News>(`/news/${id}`);
+    const response = await api.get(`/news/${id}`);
     return response.data;
-  },
-
-  async create(newsData: Partial<News>): Promise<News> {
-    const response = await apiClient.post<News>('/news', newsData);
-    return response.data;
-  },
-
-  async update(id: string, newsData: Partial<News>): Promise<News> {
-    const response = await apiClient.patch<News>(`/news/${id}`, newsData);
-    return response.data;
-  },
-
-  async publish(id: string): Promise<News> {
-    const response = await apiClient.patch<News>(`/news/${id}/publish`, {});
-    return response.data;
-  },
-
-  async unpublish(id: string): Promise<News> {
-    const response = await apiClient.patch<News>(`/news/${id}/unpublish`, {});
-    return response.data;
-  },
-
-  async delete(id: string): Promise<void> {
-    await apiClient.delete(`/news/${id}`);
   },
 };
+
+export default newsService;

@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { NewsService } from './news.service';
-import { News } from './news.entity';
+import { News, NewsCategory } from './news.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('news')
@@ -21,20 +21,32 @@ export class NewsController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Создать новость/объявление' })
-  async create(@Body() newsData: Partial<News>): Promise<News> {
+  @ApiOperation({ summary: 'Создать новость' })
+  create(@Body() newsData: Partial<News>): Promise<News> {
     return this.newsService.create(newsData);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Получить все опубликованные новости' })
-  async findAll(): Promise<News[]> {
+  @Get('published')
+  @ApiOperation({ summary: 'Получить опубликованные новости' })
+  findPublished(): Promise<News[]> {
+    return this.newsService.findPublished();
+  }
+
+  @Get('category/:category')
+  @ApiOperation({ summary: 'Новости по категории' })
+  findByCategory(@Param('category') category: NewsCategory): Promise<News[]> {
+    return this.newsService.findByCategory(category);
+  }
+
+  @Get('all')
+  @ApiOperation({ summary: 'Все новости' })
+  findAll(): Promise<News[]> {
     return this.newsService.findAll();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Получить новость по ID' })
-  async findOne(@Param('id') id: string): Promise<News> {
+  @ApiOperation({ summary: 'Новость по ID' })
+  findOne(@Param('id') id: string): Promise<News> {
     return this.newsService.findOne(id);
   }
 
@@ -42,26 +54,23 @@ export class NewsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Обновить новость' })
-  async update(
-    @Param('id') id: string,
-    @Body() newsData: Partial<News>,
-  ): Promise<News> {
+  update(@Param('id') id: string, @Body() newsData: Partial<News>): Promise<News> {
     return this.newsService.update(id, newsData);
   }
 
   @Patch(':id/publish')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Опубликовать новость' })
-  async publish(@Param('id') id: string): Promise<News> {
+  @ApiOperation({ summary: 'Опубликовать' })
+  publish(@Param('id') id: string): Promise<News> {
     return this.newsService.publish(id);
   }
 
   @Patch(':id/unpublish')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Снять новость с публикации' })
-  async unpublish(@Param('id') id: string): Promise<News> {
+  @ApiOperation({ summary: 'Снять с публикации' })
+  unpublish(@Param('id') id: string): Promise<News> {
     return this.newsService.unpublish(id);
   }
 
@@ -69,7 +78,7 @@ export class NewsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Удалить новость' })
-  async remove(@Param('id') id: string): Promise<void> {
+  remove(@Param('id') id: string): Promise<void> {
     return this.newsService.remove(id);
   }
 }

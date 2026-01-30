@@ -9,16 +9,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.News = exports.NewsType = void 0;
+exports.News = exports.NewsCategory = void 0;
 const typeorm_1 = require("typeorm");
-var NewsType;
-(function (NewsType) {
-    NewsType["ANNOUNCEMENT"] = "announcement";
-    NewsType["NEWS"] = "news";
-    NewsType["EVENT"] = "event";
-    NewsType["MAINTENANCE"] = "maintenance";
-    NewsType["EMERGENCY"] = "emergency";
-})(NewsType || (exports.NewsType = NewsType = {}));
+var NewsCategory;
+(function (NewsCategory) {
+    NewsCategory["NORMAL"] = "normal";
+    NewsCategory["PLANNED"] = "planned";
+    NewsCategory["URGENT"] = "urgent";
+})(NewsCategory || (exports.NewsCategory = NewsCategory = {}));
 let News = class News {
 };
 exports.News = News;
@@ -33,11 +31,11 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({
         type: 'enum',
-        enum: NewsType,
-        default: NewsType.ANNOUNCEMENT,
+        enum: NewsCategory,
+        default: NewsCategory.NORMAL,
     }),
     __metadata("design:type", String)
-], News.prototype, "type", void 0);
+], News.prototype, "category", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
@@ -51,9 +49,21 @@ __decorate([
     __metadata("design:type", String)
 ], News.prototype, "imageUrl", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: false }),
+    (0, typeorm_1.Column)({ default: true }),
     __metadata("design:type", Boolean)
 ], News.prototype, "isPublished", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Date)
+], News.prototype, "publishedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Date)
+], News.prototype, "expiresAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: false }),
+    __metadata("design:type", Boolean)
+], News.prototype, "isPinned", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

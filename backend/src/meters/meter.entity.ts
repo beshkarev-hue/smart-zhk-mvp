@@ -40,28 +40,20 @@ export class Meter {
   userId: string;
 
   @Column({ nullable: true })
-  accountNumber: string;
 
   @Column({ nullable: true })
-  electricityAccountNumber: string;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  currentReadingT1: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  currentReadingT2: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  currentReadingT3: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  previousReadingT1: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  previousReadingT2: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  previousReadingT3: number;
 
   @Column()
   apartmentNumber: string;
@@ -73,28 +65,20 @@ export class Meter {
   type: MeterType;
 
   @Column({ nullable: true })
-  accountNumber: string;
 
   @Column({ nullable: true })
-  electricityAccountNumber: string;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  currentReadingT1: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  currentReadingT2: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  currentReadingT3: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  previousReadingT1: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  previousReadingT2: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  previousReadingT3: number;
 
   @Column()
   serialNumber: string;

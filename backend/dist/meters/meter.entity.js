@@ -63,37 +63,13 @@ __decorate([
 ], Meter.prototype, "userId", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], Meter.prototype, "accountNumber", void 0);
-__decorate([
     (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], Meter.prototype, "electricityAccountNumber", void 0);
-__decorate([
     (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, nullable: true }),
-    __metadata("design:type", Number)
-], Meter.prototype, "currentReadingT1", void 0);
-__decorate([
     (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, nullable: true }),
-    __metadata("design:type", Number)
-], Meter.prototype, "currentReadingT2", void 0);
-__decorate([
     (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, nullable: true }),
-    __metadata("design:type", Number)
-], Meter.prototype, "currentReadingT3", void 0);
-__decorate([
     (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, nullable: true }),
-    __metadata("design:type", Number)
-], Meter.prototype, "previousReadingT1", void 0);
-__decorate([
     (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, nullable: true }),
-    __metadata("design:type", Number)
-], Meter.prototype, "previousReadingT2", void 0);
-__decorate([
     (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, nullable: true }),
-    __metadata("design:type", Number)
-], Meter.prototype, "previousReadingT3", void 0);
-__decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Meter.prototype, "apartmentNumber", void 0);
@@ -106,37 +82,13 @@ __decorate([
 ], Meter.prototype, "type", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], Meter.prototype, "accountNumber", void 0);
-__decorate([
     (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], Meter.prototype, "electricityAccountNumber", void 0);
-__decorate([
     (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, nullable: true }),
-    __metadata("design:type", Number)
-], Meter.prototype, "currentReadingT1", void 0);
-__decorate([
     (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, nullable: true }),
-    __metadata("design:type", Number)
-], Meter.prototype, "currentReadingT2", void 0);
-__decorate([
     (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, nullable: true }),
-    __metadata("design:type", Number)
-], Meter.prototype, "currentReadingT3", void 0);
-__decorate([
     (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, nullable: true }),
-    __metadata("design:type", Number)
-], Meter.prototype, "previousReadingT1", void 0);
-__decorate([
     (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, nullable: true }),
-    __metadata("design:type", Number)
-], Meter.prototype, "previousReadingT2", void 0);
-__decorate([
     (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, nullable: true }),
-    __metadata("design:type", Number)
-], Meter.prototype, "previousReadingT3", void 0);
-__decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Meter.prototype, "serialNumber", void 0);

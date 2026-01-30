@@ -1,11 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-export enum NewsType {
-  ANNOUNCEMENT = 'announcement',
-  NEWS = 'news',
-  EVENT = 'event',
-  MAINTENANCE = 'maintenance',
-  EMERGENCY = 'emergency',
+export enum NewsCategory {
+  NORMAL = 'normal',
+  PLANNED = 'planned',
+  URGENT = 'urgent',
 }
 
 @Entity('news')
@@ -18,10 +16,10 @@ export class News {
 
   @Column({
     type: 'enum',
-    enum: NewsType,
-    default: NewsType.ANNOUNCEMENT,
+    enum: NewsCategory,
+    default: NewsCategory.NORMAL,
   })
-  type: NewsType;
+  category: NewsCategory;
 
   @Column()
   title: string;
@@ -32,8 +30,17 @@ export class News {
   @Column({ nullable: true })
   imageUrl: string;
 
-  @Column({ default: false })
+  @Column({ default: true })
   isPublished: boolean;
+
+  @Column({ type: 'timestamp', nullable: true })
+  publishedAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  expiresAt: Date;
+
+  @Column({ default: false })
+  isPinned: boolean;
 
   @CreateDateColumn()
   createdAt: Date;

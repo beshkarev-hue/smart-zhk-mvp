@@ -3,13 +3,9 @@ export declare class Building {
     address: string;
     accountNumber: string;
     yearBuilt: number;
-    accountNumber: string;
     floors: number;
-    accountNumber: string;
     entrances: number;
-    accountNumber: string;
     totalApartments: number;
-    accountNumber: string;
     wallMaterial: string;
     houseRules: string;
     tariffs: any;

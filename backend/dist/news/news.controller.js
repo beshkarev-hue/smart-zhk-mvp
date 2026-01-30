@@ -16,30 +16,37 @@ exports.NewsController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const news_service_1 = require("./news.service");
+const news_entity_1 = require("./news.entity");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 let NewsController = class NewsController {
     constructor(newsService) {
         this.newsService = newsService;
     }
-    async create(newsData) {
+    create(newsData) {
         return this.newsService.create(newsData);
     }
-    async findAll() {
+    findPublished() {
+        return this.newsService.findPublished();
+    }
+    findByCategory(category) {
+        return this.newsService.findByCategory(category);
+    }
+    findAll() {
         return this.newsService.findAll();
     }
-    async findOne(id) {
+    findOne(id) {
         return this.newsService.findOne(id);
     }
-    async update(id, newsData) {
+    update(id, newsData) {
         return this.newsService.update(id, newsData);
     }
-    async publish(id) {
+    publish(id) {
         return this.newsService.publish(id);
     }
-    async unpublish(id) {
+    unpublish(id) {
         return this.newsService.unpublish(id);
     }
-    async remove(id) {
+    remove(id) {
         return this.newsService.remove(id);
     }
 };
@@ -48,22 +55,37 @@ __decorate([
     (0, common_1.Post)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Создать новость/объявление' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Создать новость' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], NewsController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Получить все опубликованные новости' }),
+    (0, common_1.Get)('published'),
+    (0, swagger_1.ApiOperation)({ summary: 'Получить опубликованные новости' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], NewsController.prototype, "findPublished", null);
+__decorate([
+    (0, common_1.Get)('category/:category'),
+    (0, swagger_1.ApiOperation)({ summary: 'Новости по категории' }),
+    __param(0, (0, common_1.Param)('category')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], NewsController.prototype, "findByCategory", null);
+__decorate([
+    (0, common_1.Get)('all'),
+    (0, swagger_1.ApiOperation)({ summary: 'Все новости' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], NewsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, swagger_1.ApiOperation)({ summary: 'Получить новость по ID' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Новость по ID' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -84,7 +106,7 @@ __decorate([
     (0, common_1.Patch)(':id/publish'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Опубликовать новость' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Опубликовать' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -94,7 +116,7 @@ __decorate([
     (0, common_1.Patch)(':id/unpublish'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Снять новость с публикации' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Снять с публикации' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
