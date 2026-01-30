@@ -127,7 +127,7 @@ const ManagerDashboardPage: React.FC = () => {
               <div style={styles.quickActionTitle}>Список жильцов</div>
             </button>
 
-            <button style={styles.quickActionCard}>
+            <button style={styles.quickActionCard} onClick={() => navigate('/manager/news')}>
               <div style={styles.quickActionIcon}>📰</div>
               <div style={styles.quickActionTitle}>Новости</div>
             </button>
