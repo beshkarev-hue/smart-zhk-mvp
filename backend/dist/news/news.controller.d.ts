@@ -4,8 +4,8 @@ export declare class NewsController {
     private readonly newsService;
     constructor(newsService: NewsService);
     create(newsData: Partial<News>): Promise<News>;
-    findPublished(): Promise<News[]>;
-    findByCategory(category: NewsCategory): Promise<News[]>;
+    findPublished(req: any): Promise<News[]>;
+    findByCategory(req: any, category: NewsCategory): Promise<News[]>;
     findAll(): Promise<News[]>;
     findOne(id: string): Promise<News>;
     update(id: string, newsData: Partial<News>): Promise<News>;

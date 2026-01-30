@@ -17,11 +17,9 @@ export class NewsService {
     await queryRunner.startTransaction();
 
     try {
-      // Создаём новость
       const news = this.newsRepository.create(newsData);
       const savedNews = await queryRunner.manager.save(news);
 
-      // Если указаны конкретные адреса - сохраняем связи
       if (newsData.buildingIds && newsData.buildingIds.length > 0) {
         for (const buildingId of newsData.buildingIds) {
           await queryRunner.manager.query(
@@ -50,29 +48,84 @@ export class NewsService {
     });
   }
 
-  async findPublished(): Promise<News[]> {
+  async findPublished(userId: string): Promise<News[]> {
     const now = new Date();
-    return this.newsRepository
-      .createQueryBuilder('news')
-      .where('news.isPublished = :published', { published: true })
-      .andWhere('news.publishedAt <= :now', { now })
-      .andWhere('(news.expiresAt IS NULL OR news.expiresAt >= :now)', { now })
-      .orderBy('news.isPinned', 'DESC')
-      .addOrderBy('news.publishedAt', 'DESC')
-      .getMany();
+    
+    // Получаем адрес жильца
+    const userResult = await this.dataSource.query(
+      'SELECT "buildingAddress" FROM users WHERE id = $1',
+      [userId]
+    );
+    
+    if (!userResult || userResult.length === 0) {
+      return [];
+    }
+    
+    const userAddress = userResult[0].buildingAddress;
+    
+    // Получаем building ID по адресу
+    const buildingResult = await this.dataSource.query(
+      'SELECT id FROM buildings WHERE address = $1',
+      [userAddress]
+    );
+    
+    const buildingId = buildingResult.length > 0 ? buildingResult[0].id : null;
+
+    // Получаем новости: для всех адресов ИЛИ для конкретного адреса жильца
+    const query = `
+      SELECT DISTINCT n.* 
+      FROM news n
+      LEFT JOIN news_buildings nb ON n.id = nb."newsId"
+      WHERE n."isPublished" = true
+        AND n."publishedAt" <= $1
+        AND (n."expiresAt" IS NULL OR n."expiresAt" >= $1)
+        AND (
+          nb."buildingId" IS NULL 
+          OR nb."buildingId" = $2
+        )
+      ORDER BY n."isPinned" DESC, n."publishedAt" DESC
+    `;
+    
+    return this.dataSource.query(query, [now, buildingId]);
   }
 
-  async findByCategory(category: NewsCategory): Promise<News[]> {
+  async findByCategory(userId: string, category: NewsCategory): Promise<News[]> {
     const now = new Date();
-    return this.newsRepository
-      .createQueryBuilder('news')
-      .where('news.category = :category', { category })
-      .andWhere('news.isPublished = :published', { published: true })
-      .andWhere('news.publishedAt <= :now', { now })
-      .andWhere('(news.expiresAt IS NULL OR news.expiresAt >= :now)', { now })
-      .orderBy('news.isPinned', 'DESC')
-      .addOrderBy('news.publishedAt', 'DESC')
-      .getMany();
+    
+    const userResult = await this.dataSource.query(
+      'SELECT "buildingAddress" FROM users WHERE id = $1',
+      [userId]
+    );
+    
+    if (!userResult || userResult.length === 0) {
+      return [];
+    }
+    
+    const userAddress = userResult[0].buildingAddress;
+    
+    const buildingResult = await this.dataSource.query(
+      'SELECT id FROM buildings WHERE address = $1',
+      [userAddress]
+    );
+    
+    const buildingId = buildingResult.length > 0 ? buildingResult[0].id : null;
+
+    const query = `
+      SELECT DISTINCT n.* 
+      FROM news n
+      LEFT JOIN news_buildings nb ON n.id = nb."newsId"
+      WHERE n."isPublished" = true
+        AND n."publishedAt" <= $1
+        AND (n."expiresAt" IS NULL OR n."expiresAt" >= $1)
+        AND n.category = $2
+        AND (
+          nb."buildingId" IS NULL 
+          OR nb."buildingId" = $3
+        )
+      ORDER BY n."isPinned" DESC, n."publishedAt" DESC
+    `;
+    
+    return this.dataSource.query(query, [now, category, buildingId]);
   }
 
   async findOne(id: string): Promise<News> {

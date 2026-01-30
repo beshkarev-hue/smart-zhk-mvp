@@ -8,8 +8,8 @@ export declare class NewsService {
         buildingIds?: string[];
     }): Promise<News>;
     findAll(): Promise<News[]>;
-    findPublished(): Promise<News[]>;
-    findByCategory(category: NewsCategory): Promise<News[]>;
+    findPublished(userId: string): Promise<News[]>;
+    findByCategory(userId: string, category: NewsCategory): Promise<News[]>;
     findOne(id: string): Promise<News>;
     update(id: string, newsData: Partial<News>): Promise<News>;
     remove(id: string): Promise<void>;

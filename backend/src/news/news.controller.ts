@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { NewsService } from './news.service';
@@ -27,18 +28,21 @@ export class NewsController {
   }
 
   @Get('published')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Получить опубликованные новости' })
-  findPublished(): Promise<News[]> {
-    return this.newsService.findPublished();
+  findPublished(@Request() req): Promise<News[]> {
+    return this.newsService.findPublished(req.user.userId);
   }
 
   @Get('category/:category')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Новости по категории' })
-  findByCategory(@Param('category') category: NewsCategory): Promise<News[]> {
-    return this.newsService.findByCategory(category);
+  findByCategory(@Request() req, @Param('category') category: NewsCategory): Promise<News[]> {
+    return this.newsService.findByCategory(req.user.userId, category);
   }
 
   @Get('all')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Все новости' })
   findAll(): Promise<News[]> {
     return this.newsService.findAll();

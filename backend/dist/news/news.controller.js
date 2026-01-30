@@ -25,11 +25,11 @@ let NewsController = class NewsController {
     create(newsData) {
         return this.newsService.create(newsData);
     }
-    findPublished() {
-        return this.newsService.findPublished();
+    findPublished(req) {
+        return this.newsService.findPublished(req.user.userId);
     }
-    findByCategory(category) {
-        return this.newsService.findByCategory(category);
+    findByCategory(req, category) {
+        return this.newsService.findByCategory(req.user.userId, category);
     }
     findAll() {
         return this.newsService.findAll();
@@ -63,21 +63,26 @@ __decorate([
 ], NewsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)('published'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Получить опубликованные новости' }),
+    __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], NewsController.prototype, "findPublished", null);
 __decorate([
     (0, common_1.Get)('category/:category'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Новости по категории' }),
-    __param(0, (0, common_1.Param)('category')),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('category')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], NewsController.prototype, "findByCategory", null);
 __decorate([
     (0, common_1.Get)('all'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Все новости' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
