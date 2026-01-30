@@ -144,3 +144,26 @@
 .submitButton:hover {
   background: #45a049;
 }
+
+.buildingsCheckboxes {
+  margin-top: 12px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.buildingsCheckboxes .checkbox {
+  padding: 8px;
+  background: white;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.buildingsCheckboxes .checkbox:hover {
+  background: #f0f0f0;
+}

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { News, NewsCategory } from './news.entity';
 
 @Injectable()
@@ -8,11 +8,37 @@ export class NewsService {
   constructor(
     @InjectRepository(News)
     private newsRepository: Repository<News>,
+    private dataSource: DataSource,
   ) {}
 
-  async create(newsData: Partial<News>): Promise<News> {
-    const news = this.newsRepository.create(newsData);
-    return this.newsRepository.save(news);
+  async create(newsData: Partial<News> & { buildingIds?: string[] }): Promise<News> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // Создаём новость
+      const news = this.newsRepository.create(newsData);
+      const savedNews = await queryRunner.manager.save(news);
+
+      // Если указаны конкретные адреса - сохраняем связи
+      if (newsData.buildingIds && newsData.buildingIds.length > 0) {
+        for (const buildingId of newsData.buildingIds) {
+          await queryRunner.manager.query(
+            'INSERT INTO news_buildings ("newsId", "buildingId") VALUES ($1, $2)',
+            [savedNews.id, buildingId]
+          );
+        }
+      }
+
+      await queryRunner.commitTransaction();
+      return savedNews;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async findAll(): Promise<News[]> {

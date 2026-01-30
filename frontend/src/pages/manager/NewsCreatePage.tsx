@@ -1,16 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './NewsCreatePage.module.css';
 
+interface Building {
+  id: string;
+  address: string;
+}
+
 const NewsCreatePage: React.FC = () => {
   const navigate = useNavigate();
+  const [buildings, setBuildings] = useState<Building[]>([]);
   const [formData, setFormData] = useState({
     category: 'normal',
     title: '',
     content: '',
     isPinned: false,
     isPublished: true,
+    isForAllBuildings: true,
+    selectedBuildings: [] as string[],
   });
+
+  useEffect(() => {
+    loadBuildings();
+  }, []);
+
+  const loadBuildings = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch('http://localhost:3000/buildings', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const data = await response.json();
+      setBuildings(data);
+    } catch (error) {
+      console.error('Ошибка загрузки адресов:', error);
+    }
+  };
+
+  const handleBuildingToggle = (buildingId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedBuildings: prev.selectedBuildings.includes(buildingId)
+        ? prev.selectedBuildings.filter(id => id !== buildingId)
+        : [...prev.selectedBuildings, buildingId]
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,8 +58,13 @@ const NewsCreatePage: React.FC = () => {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ...formData,
+          category: formData.category,
+          title: formData.title,
+          content: formData.content,
+          isPinned: formData.isPinned,
+          isPublished: formData.isPublished,
           publishedAt: formData.isPublished ? new Date().toISOString() : null,
+          buildingIds: formData.isForAllBuildings ? [] : formData.selectedBuildings,
         }),
       });
 
@@ -65,6 +104,40 @@ const NewsCreatePage: React.FC = () => {
             <option value="planned">⚠️ Плановые работы</option>
             <option value="urgent">🚨 Срочное (авария)</option>
           </select>
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>
+            Адреса получателей <span className={styles.required}>*</span>
+          </label>
+          
+          <label className={styles.checkbox}>
+            <input
+              type="checkbox"
+              checked={formData.isForAllBuildings}
+              onChange={(e) => setFormData({ 
+                ...formData, 
+                isForAllBuildings: e.target.checked,
+                selectedBuildings: e.target.checked ? [] : formData.selectedBuildings
+              })}
+            />
+            <span><strong>Все адреса</strong> (новость увидят все жильцы)</span>
+          </label>
+
+          {!formData.isForAllBuildings && (
+            <div className={styles.buildingsCheckboxes}>
+              {buildings.map(building => (
+                <label key={building.id} className={styles.checkbox}>
+                  <input
+                    type="checkbox"
+                    checked={formData.selectedBuildings.includes(building.id)}
+                    onChange={() => handleBuildingToggle(building.id)}
+                  />
+                  <span>{building.address}</span>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className={styles.field}>

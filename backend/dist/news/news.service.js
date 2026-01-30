@@ -18,12 +18,32 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const news_entity_1 = require("./news.entity");
 let NewsService = class NewsService {
-    constructor(newsRepository) {
+    constructor(newsRepository, dataSource) {
         this.newsRepository = newsRepository;
+        this.dataSource = dataSource;
     }
     async create(newsData) {
-        const news = this.newsRepository.create(newsData);
-        return this.newsRepository.save(news);
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const news = this.newsRepository.create(newsData);
+            const savedNews = await queryRunner.manager.save(news);
+            if (newsData.buildingIds && newsData.buildingIds.length > 0) {
+                for (const buildingId of newsData.buildingIds) {
+                    await queryRunner.manager.query('INSERT INTO news_buildings ("newsId", "buildingId") VALUES ($1, $2)', [savedNews.id, buildingId]);
+                }
+            }
+            await queryRunner.commitTransaction();
+            return savedNews;
+        }
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
     async findAll() {
         return this.newsRepository.find({
@@ -83,6 +103,7 @@ exports.NewsService = NewsService;
 exports.NewsService = NewsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(news_entity_1.News)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.DataSource])
 ], NewsService);
 //# sourceMappingURL=news.service.js.map

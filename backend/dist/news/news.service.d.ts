@@ -1,9 +1,12 @@
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { News, NewsCategory } from './news.entity';
 export declare class NewsService {
     private newsRepository;
-    constructor(newsRepository: Repository<News>);
-    create(newsData: Partial<News>): Promise<News>;
+    private dataSource;
+    constructor(newsRepository: Repository<News>, dataSource: DataSource);
+    create(newsData: Partial<News> & {
+        buildingIds?: string[];
+    }): Promise<News>;
     findAll(): Promise<News[]>;
     findPublished(): Promise<News[]>;
     findByCategory(category: NewsCategory): Promise<News[]>;

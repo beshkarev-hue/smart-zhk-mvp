@@ -21,6 +21,7 @@ import ExecutorDashboardPage from './pages/executor/ExecutorDashboardPage';
 import ManagerRequestsPage from './pages/manager/ManagerRequestsPage';
 import NewsManagementPage from './pages/manager/NewsManagementPage';
 import NewsCreatePage from './pages/manager/NewsCreatePage';
+import BuildingsPage from './pages/manager/BuildingsPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactElement; allowedRoles?: string[] }> = ({ children, allowedRoles }) => {
   const isAuthenticated = authService.isAuthenticated();
@@ -63,6 +64,7 @@ function App() {
         <Route path="/manager/dashboard" element={<ProtectedRoute allowedRoles={['manager', 'admin']}><ManagerDashboardPage /></ProtectedRoute>} />
         <Route path="/manager/news" element={<ProtectedRoute allowedRoles={["manager", "admin"]}><NewsManagementPage /></ProtectedRoute>} />
         <Route path="/manager/news/create" element={<ProtectedRoute allowedRoles={["manager", "admin"]}><NewsCreatePage /></ProtectedRoute>} />
+        <Route path="/manager/buildings" element={<ProtectedRoute allowedRoles={['manager', 'admin']}><BuildingsPage /></ProtectedRoute>} />
 
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
