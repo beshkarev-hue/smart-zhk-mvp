@@ -17,6 +17,7 @@ const requests_module_1 = require("./requests/requests.module");
 const buildings_module_1 = require("./buildings/buildings.module");
 const meters_module_1 = require("./meters/meters.module");
 const news_module_1 = require("./news/news.module");
+const user_news_read_module_1 = require("./user-news-read/user-news-read.module");
 const gis_zhkh_module_1 = require("./gis-zhkh/gis-zhkh.module");
 let AppModule = class AppModule {
 };
@@ -45,6 +46,7 @@ exports.AppModule = AppModule = __decorate([
             buildings_module_1.BuildingsModule,
             meters_module_1.MetersModule,
             news_module_1.NewsModule,
+            user_news_read_module_1.UserNewsReadModule,
             gis_zhkh_module_1.GisZhkhModule,
         ],
     })

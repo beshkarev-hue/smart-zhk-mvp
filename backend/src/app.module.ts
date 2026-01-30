@@ -8,6 +8,7 @@ import { RequestsModule } from './requests/requests.module';
 import { BuildingsModule } from './buildings/buildings.module';
 import { MetersModule } from './meters/meters.module';
 import { NewsModule } from './news/news.module';
+import { UserNewsReadModule } from './user-news-read/user-news-read.module';
 import { GisZhkhModule } from './gis-zhkh/gis-zhkh.module';
 
 @Module({
@@ -38,6 +39,7 @@ import { GisZhkhModule } from './gis-zhkh/gis-zhkh.module';
     BuildingsModule,
     MetersModule,
     NewsModule,
+    UserNewsReadModule,
     GisZhkhModule,
   ],
 })

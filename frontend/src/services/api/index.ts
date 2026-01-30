@@ -9,3 +9,4 @@ export { usersService } from './usersService';
 
 export * from './buildingsService';
 export * from './metersService';
+export { default as userNewsReadService } from './userNewsReadService';

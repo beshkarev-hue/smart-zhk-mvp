@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService, requestsService } from '../../services/api';
+import { authService, requestsService, newsService, userNewsReadService } from '../../services/api';
 import Logo from '../../components/Logo';
 import { colors } from '../../theme/colors';
 
@@ -10,6 +10,7 @@ const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState({
     activeRequests: 0,
     hasUpdates: false,
+    unreadNews: 0,
   });
 
   useEffect(() => {
@@ -20,18 +21,28 @@ const DashboardPage: React.FC = () => {
 
   const loadStats = async () => {
     try {
-      const requests = await requestsService.getByUser(authService.getCurrentUser()?.id || '');
-      const active = requests.filter((r: any) => r.status === 'new' || r.status === 'assigned' || r.status === 'accepted' || r.status === 'in_progress').length;
+      const [requests, news, readNewsIds] = await Promise.all([
+        requestsService.getByUser(authService.getCurrentUser()?.id || ''),
+        newsService.getPublished(),
+        userNewsReadService.getReadNewsIds(),
+      ]);
+
+      const active = requests.filter((r: any) => 
+        r.status === 'new' || r.status === 'assigned' || r.status === 'accepted' || r.status === 'in_progress'
+      ).length;
       
       const lastVisit = localStorage.getItem('resident_last_visit') || '0';
       const hasNew = requests.some((r: any) => 
         (r.response || r.assignedTo || r.executorComment || r.status === 'completed') &&
         new Date(r.updatedAt || r.createdAt).getTime() > parseInt(lastVisit)
       );
+
+      const unreadNews = news.filter(n => !readNewsIds.includes(n.id)).length;
       
       setStats({
         activeRequests: active,
         hasUpdates: hasNew,
+        unreadNews,
       });
     } catch (error) {
       console.error('Ошибка загрузки:', error);
@@ -48,133 +59,184 @@ const DashboardPage: React.FC = () => {
     navigate('/login');
   };
 
+  if (!user) {
+    return <div>Загрузка...</div>;
+  }
+
   return (
     <div style={styles.container}>
-      <header style={styles.header}>
-        <div style={styles.headerContent}>
-          <Logo size="large" showText={false} />
-          <div style={styles.headerRight}>
-            <span style={styles.userName}>{user?.firstName || 'Пользователь'}</span>
-            <button onClick={handleLogout} style={styles.logoutButton}>Выход</button>
+      <div style={styles.header}>
+        <Logo size="medium" showText={true} />
+        <div style={styles.headerRight}>
+          <div style={styles.userInfo}>
+            <div style={styles.userName}>{user.firstName} {user.lastName}</div>
+            <div style={styles.userDetails}>Квартира {user.apartmentNumber}</div>
+          </div>
+          <button onClick={handleLogout} style={styles.logoutButton}>
+            Выйти
+          </button>
+        </div>
+      </div>
+
+      <div style={styles.content}>
+        <h1 style={styles.title}>Личный кабинет жильца</h1>
+        
+        <div style={styles.grid}>
+          <div style={styles.card} onClick={() => navigate('/resident/building-info')}>
+            <div style={styles.cardIcon}>🏢</div>
+            <h3 style={styles.cardTitle}>Мой дом</h3>
+            <p style={styles.cardDescription}>Информация о доме, тарифы, контакты УК</p>
+          </div>
+
+          <div style={styles.card} onClick={() => navigate('/resident/meters')}>
+            <div style={styles.cardIcon}>📊</div>
+            <h3 style={styles.cardTitle}>Счётчики</h3>
+            <p style={styles.cardDescription}>Передача показаний воды и электричества</p>
+          </div>
+
+          <div style={styles.card} onClick={() => navigate('/resident/payments')}>
+            <div style={styles.cardIcon}>💳</div>
+            <h3 style={styles.cardTitle}>Платежи</h3>
+            <p style={styles.cardDescription}>История платежей и текущие начисления</p>
+          </div>
+
+          <div 
+            style={{...styles.card, ...(stats.hasUpdates ? styles.cardWithBadge : {})}} 
+            onClick={handleNavigateToRequests}
+          >
+            {stats.hasUpdates && <div style={styles.updateBadge}>●</div>}
+            <div style={styles.cardIcon}>📝</div>
+            <h3 style={styles.cardTitle}>Заявки</h3>
+            <p style={styles.cardDescription}>
+              {stats.activeRequests > 0 ? `Активных: ${stats.activeRequests}` : 'Создать заявку на ремонт'}
+            </p>
+          </div>
+
+          <div 
+            style={styles.card} 
+            onClick={() => navigate('/resident/news')}
+          >
+            {stats.unreadNews > 0 && (
+              <div style={styles.badge}>{stats.unreadNews}</div>
+            )}
+            <div style={styles.cardIcon}>📰</div>
+            <h3 style={styles.cardTitle}>Новости</h3>
+            <p style={styles.cardDescription}>Объявления и важная информация</p>
+          </div>
+
+          <div style={styles.card} onClick={() => navigate('/resident/profile')}>
+            <div style={styles.cardIcon}>👤</div>
+            <h3 style={styles.cardTitle}>Профиль</h3>
+            <p style={styles.cardDescription}>Личные данные и настройки</p>
           </div>
         </div>
-      </header>
-
-      <main style={styles.main}>
-        <section style={styles.welcomeSection}>
-          <h2 style={styles.welcomeTitle}>
-            Добро пожаловать, {user?.firstName || 'Пользователь'}!
-          </h2>
-          {user?.buildingAddress && user?.apartmentNumber && (
-            <p style={styles.welcomeAddress}>
-              {user.buildingAddress}, кв. {user.apartmentNumber}
-            </p>
-          )}
-        </section>
-
-        <section style={styles.statsSection}>
-          <div style={styles.statCard}>
-            <div style={styles.statIcon}>💳</div>
-            <div style={styles.statContent}>
-              <div style={styles.statValue}>0 ₽</div>
-              <div style={styles.statLabel}>Задолженность</div>
-            </div>
-          </div>
-
-          <div style={styles.statCard}>
-            <div style={styles.statIcon}>📋</div>
-            <div style={styles.statContent}>
-              <div style={styles.statValue}>{stats.activeRequests}</div>
-              <div style={styles.statLabel}>Активных заявок</div>
-            </div>
-          </div>
-
-          <div style={styles.statCard}>
-            <div style={styles.statIcon}>🧾</div>
-            <div style={styles.statContent}>
-              <div style={styles.statValue}>0</div>
-              <div style={styles.statLabel}>Неоплаченных счетов</div>
-            </div>
-          </div>
-        </section>
-
-        <section style={styles.quickActionsSection}>
-          <h3 style={styles.sectionTitle}>Быстрые действия</h3>
-          <div style={styles.quickActionsGrid}>
-            <button onClick={() => navigate('/resident/payments')} style={styles.quickActionCard}>
-              <div style={styles.quickActionIcon}>💳</div>
-              <div style={styles.quickActionTitle}>Оплата ЖКУ</div>
-            </button>
-
-            <button onClick={() => navigate('/resident/meters')} style={styles.quickActionCard}>
-              <div style={styles.quickActionIcon}>📊</div>
-              <div style={styles.quickActionTitle}>Показания счётчиков</div>
-            </button>
-
-            <button onClick={handleNavigateToRequests} style={styles.quickActionCard}>
-              <div style={styles.quickActionIcon}>📋</div>
-              <div style={styles.quickActionTitle}>Мои заявки</div>
-              {stats.activeRequests > 0 && <div style={styles.badge}>{stats.activeRequests}</div>}
-              {stats.hasUpdates && <div style={styles.updateBadge}></div>}
-            </button>
-
-            <button onClick={() => navigate('/resident/news')} style={styles.quickActionCard}>
-              <div style={styles.quickActionIcon}>📰</div>
-              <div style={styles.quickActionTitle}>Новости</div>
-            </button>
-
-            <button onClick={() => navigate('/resident/building')} style={styles.quickActionCard}>
-              <div style={styles.quickActionIcon}>🏢</div>
-              <div style={styles.quickActionTitle}>О доме</div>
-            </button>
-
-            <button onClick={() => navigate('/resident/profile')} style={styles.quickActionCard}>
-              <div style={styles.quickActionIcon}>👤</div>
-              <div style={styles.quickActionTitle}>Профиль</div>
-            </button>
-          </div>
-        </section>
-      </main>
+      </div>
     </div>
   );
 };
 
-const styles: Record<string, React.CSSProperties> = {
-  container: { minHeight: '100vh', backgroundColor: 'rgba(124, 179, 66, 0.08)' },
-  header: { backgroundColor: 'rgba(124, 179, 66, 0.2)', borderBottom: `2px solid ${colors.primary}`, padding: '12px 0', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
-  headerContent: { maxWidth: '1200px', margin: '0 auto', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  headerRight: { display: 'flex', alignItems: 'center', gap: '16px' },
-  userName: { fontSize: '16px', color: '#000', fontWeight: '600' },
-  logoutButton: { padding: '8px 16px', backgroundColor: colors.error, color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' },
-  main: { maxWidth: '1200px', margin: '0 auto', padding: '32px 20px' },
-  welcomeSection: { marginBottom: '32px' },
-  welcomeTitle: { fontSize: '28px', fontWeight: 'bold', marginBottom: '8px', marginTop: 0, color: colors.text },
-  welcomeAddress: { fontSize: '16px', color: colors.textLight, margin: 0 },
-  statsSection: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '40px' },
-  statCard: { backgroundColor: 'white', borderRadius: '12px', padding: '24px', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', border: `2px solid ${colors.light}` },
-  statIcon: { fontSize: '36px' },
-  statContent: { flex: 1 },
-  statValue: { fontSize: '32px', fontWeight: 'bold', color: colors.primary, marginBottom: '4px' },
-  statLabel: { fontSize: '14px', color: colors.textLight },
-  quickActionsSection: { marginBottom: '40px' },
-  sectionTitle: { fontSize: '20px', fontWeight: 'bold', marginBottom: '20px', marginTop: 0, color: colors.text },
-  quickActionsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '16px' },
-  quickActionCard: { 
-    position: 'relative', 
-    backgroundColor: 'rgba(30, 136, 229, 0.85)', 
-    border: 'none', 
-    borderRadius: '12px', 
-    padding: '24px', 
-    textAlign: 'center', 
-    cursor: 'pointer', 
-    transition: 'all 0.2s', 
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    color: 'white'
+const styles = {
+  container: {
+    minHeight: '100vh',
+    background: '#f5f7fa',
   },
-  quickActionIcon: { fontSize: '48px', marginBottom: '12px' },
-  quickActionTitle: { fontSize: '14px', fontWeight: '600', color: 'white' },
-  badge: { position: 'absolute', top: '10px', right: '10px', backgroundColor: colors.accent, color: 'white', borderRadius: '12px', padding: '4px 8px', fontSize: '12px', fontWeight: 'bold' },
-  updateBadge: { position: 'absolute', top: '10px', right: '10px', backgroundColor: colors.error, borderRadius: '50%', width: '12px', height: '12px' },
+  header: {
+    background: 'white',
+    padding: '20px 40px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+  },
+  headerRight: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '20px',
+  },
+  userInfo: {
+    textAlign: 'right' as const,
+  },
+  userName: {
+    fontWeight: 600,
+    fontSize: '16px',
+    color: '#333',
+  },
+  userDetails: {
+    fontSize: '14px',
+    color: '#666',
+  },
+  logoutButton: {
+    padding: '8px 16px',
+    background: colors.error,
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '14px',
+  },
+  content: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '40px 20px',
+  },
+  title: {
+    fontSize: '32px',
+    fontWeight: 700,
+    marginBottom: '40px',
+    color: '#333',
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gap: '24px',
+  },
+  card: {
+    background: 'white',
+    padding: '32px',
+    borderRadius: '16px',
+    cursor: 'pointer',
+    transition: 'all 0.3s',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    position: 'relative' as const,
+  },
+  cardWithBadge: {
+    position: 'relative' as const,
+  },
+  badge: {
+    position: 'absolute' as const,
+    top: '16px',
+    right: '16px',
+    background: colors.error,
+    color: 'white',
+    borderRadius: '12px',
+    padding: '4px 8px',
+    fontSize: '12px',
+    fontWeight: 600,
+    minWidth: '24px',
+    textAlign: 'center' as const,
+  },
+  updateBadge: {
+    position: 'absolute' as const,
+    top: '20px',
+    right: '20px',
+    color: colors.primary,
+    fontSize: '24px',
+  },
+  cardIcon: {
+    fontSize: '48px',
+    marginBottom: '16px',
+  },
+  cardTitle: {
+    fontSize: '20px',
+    fontWeight: 600,
+    marginBottom: '8px',
+    color: '#333',
+  },
+  cardDescription: {
+    fontSize: '14px',
+    color: '#666',
+    margin: 0,
+  },
 };
 
 export default DashboardPage;

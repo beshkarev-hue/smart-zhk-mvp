@@ -111,3 +111,53 @@
 .header h1 {
   margin: 0;
 }
+
+.markAllButton {
+  padding: 8px 16px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+  margin-left: auto;
+}
+
+.markAllButton:hover {
+  background: #45a049;
+}
+
+.newsCard {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.newsCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.newsCard.unread {
+  background: #fff;
+  font-weight: 500;
+}
+
+.newsCard.read {
+  background: #fafafa;
+  opacity: 0.85;
+}
+
+.newsCard.read h3 {
+  color: #666;
+}
+
+.unreadBadge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  color: #2196F3;
+  font-size: 24px;
+  line-height: 1;
+}
