@@ -28,6 +28,10 @@ const newsService = {
     const response = await api.get(`/news/${id}`);
     return response.data;
   },
+
+  async remove(id: string): Promise<void> {
+    await api.delete(`/news/${id}`);
+  },
 };
 
 export default newsService;
