@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService, requestsService, newsService, userNewsReadService } from '../../services/api';
+import { authService, requestsService, newsService, userNewsReadService, buildingsService } from '../../services/api';
 import Logo from '../../components/Logo';
 import { colors } from '../../theme/colors';
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
+  const [building, setBuilding] = useState<any>(null);
   const [stats, setStats] = useState({
     activeRequests: 0,
     hasUpdates: false,
@@ -16,8 +17,20 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
+    loadBuilding(currentUser);
     loadStats();
   }, []);
+
+  const loadBuilding = async (currentUser: any) => {
+    if (currentUser?.buildingAddress) {
+      try {
+        const buildingData = await buildingsService.getByAddress(currentUser.buildingAddress);
+        setBuilding(buildingData);
+      } catch (error) {
+        console.error("Ошибка загрузки данных дома:", error);
+      }
+    }
+  };
 
   const loadStats = async () => {
     try {
@@ -71,6 +84,10 @@ const DashboardPage: React.FC = () => {
           <div style={styles.userInfo}>
             <div style={styles.userName}>{user.firstName} {user.lastName}</div>
             <div style={styles.userDetails}>Квартира {user.apartmentNumber}</div>
+            <div style={styles.userDetails}>{user.buildingAddress}</div>
+            {building?.accountNumber && (
+              <div style={styles.userDetails}>Лицевой счёт: {building.accountNumber}</div>
+            )}
           </div>
           <button onClick={handleLogout} style={styles.logoutButton}>
             Выйти
@@ -136,18 +153,8 @@ const DashboardPage: React.FC = () => {
 };
 
 const styles = {
-  container: {
-    minHeight: '100vh',
-    background: '#f5f7fa',
-  },
-  header: {
-    background: 'white',
-    padding: '20px 40px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-  },
+  container: { minHeight: '100vh', backgroundColor: 'rgba(124, 179, 66, 0.08)' },
+  header: { backgroundColor: 'rgba(124, 179, 66, 0.2)', borderBottom: '2px solid #4CAF50', padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
   headerRight: {
     display: 'flex',
     alignItems: 'center',
@@ -183,7 +190,7 @@ const styles = {
     fontSize: '32px',
     fontWeight: 700,
     marginBottom: '40px',
-    color: '#333',
+    color: 'white',
   },
   grid: {
     display: 'grid',
@@ -191,13 +198,15 @@ const styles = {
     gap: '24px',
   },
   card: {
-    background: 'white',
-    padding: '32px',
-    borderRadius: '16px',
-    cursor: 'pointer',
-    transition: 'all 0.3s',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
     position: 'relative' as const,
+    backgroundColor: 'rgba(30, 136, 229, 0.85)',
+    border: 'none',
+    borderRadius: '12px',
+    padding: '32px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    color: 'white',
   },
   cardWithBadge: {
     position: 'relative' as const,
@@ -230,11 +239,11 @@ const styles = {
     fontSize: '20px',
     fontWeight: 600,
     marginBottom: '8px',
-    color: '#333',
+    color: 'white',
   },
   cardDescription: {
     fontSize: '14px',
-    color: '#666',
+    color: 'rgba(255, 255, 255, 0.9)',
     margin: 0,
   },
 };
